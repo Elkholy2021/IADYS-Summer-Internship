@@ -366,19 +366,32 @@ class control_jellyfishbot {
         double xsol1;
         double xsol2;
         if (yf - yp == 0){
-            double ysol1 = yp;
-            double ysol2 = yp;
-            double xsol1 = xp - delta;
-            double xsol2 = xp + delta;
+            yd = yp;
+            if (xf >= xp){
+                xd = xp + delta;
             }
+            else{
+                xd = xp - delta;
+            }
+            }
+        else if (xf - xp == 0){
+            xd = xp;
+            if (yf >= yp){
+                yd = yp + delta;
+            }
+            else {
+                yd = yp - delta;
+            }
+
+        }
         else{
             slope = (xf - xp)/(yf - yp);
-            double ysol1 = (-B+sqrt(pow(B,2)-4*A*C))/(2*A);
-            double ysol2 = (-B-sqrt(pow(B,2)-4*A*C))/(2*A);
-            double xsol1 = ax + slope*(ysol1-ay);
-            double xsol2 = ax + slope*(ysol2-ay);
-            }
-        
+            ysol1 = (-B+sqrt(pow(B,2)-4*A*C))/(2*A);
+            ysol2 = (-B-sqrt(pow(B,2)-4*A*C))/(2*A);
+            xsol1 = ax + slope*(ysol1-ay);
+            xsol2 = ax + slope*(ysol2-ay);
+            cout << "xsol1,ysol1: "<< xsol1 << ","<< ysol1<< endl;
+        cout << "xsol2,ysol2: "<< xsol2 << ","<< ysol2<< endl;
         bool c1;
         bool c2;
         double xdF;
@@ -395,41 +408,71 @@ class control_jellyfishbot {
 
             if (xp <= xd <= xf | xp >= xd >= xf){
               c1 = true;
-          }
-          else{
+            }
+            else{
               c1 = false;
-          }
-
-          if (yp <= yd <= yf | yp >= yd >= yf) {
-              c2 = true;
-          }
-          else{
-              c2 = false;
-          }
-          if (c1 & c2){
-              int hehe = 1;
-          }
-          else {
-              xd = xd + pow(xp - xd,2);
-              yd = yd + pow(yp - yd,2);
-          }
-      if (xd > xf & xd > xp | xd < xf & xd < xp){
-          xd = xf;
-      }
-      if (yd > yf & yd > yp | yd < yf & yd < yp){
-          yd = yf;
-      }
-      xdF = xd;
-      ydF = yd;
-
             }
 
-          
-          
+            if (yp <= yd <= yf | yp >= yd >= yf) {
+              c2 = true;
+            }
+            else{
+              c2 = false;
+            }
+            if (c1 == true & c2 == true){
+                int hehe = 1;
+                break;
+            }
+            else {
+                xd = xd + pow(xp - xd,2);
+                yd = yd + pow(yp - yd,2);
+            }
+            
 
-      
-      xd = xdF;
-      yd = ydF;
+            // xdF = xd;
+            // ydF = yd;
+
+        }
+
+            }
+        if (xd >= xf && xd >= xp ){
+                if (xf >= xp){
+                    xd = xf;
+                }
+                else{
+                    xd = xp;
+                }
+
+            }
+            else if (xd < xf && xd < xp){
+                if (xf < xp){
+                    xd = xf;
+                }
+                else{
+                    xd = xp;
+                }
+            }
+            if (yd > yf && yd > yp ){
+                if (yf >= yp){
+                    yd = yf;
+                }
+                else{
+                    yd = yp;
+                }
+            }
+            else if (yd < yf && yd < yp){
+                if (yf < yp){
+                    yd = yf;
+                }
+                else{
+                    yd = yp;
+                }
+            }
+        
+    //   xd = xdF;
+    //   yd = ydF;
+    cout << "xd,yd: " << xd <<","<<yd<<endl; 
+
     ////cout << "Final solution is yd= " << ydF << " and xd = " << xdF << endl;
   }
   bool check_arrival(double threshold){
@@ -444,7 +487,7 @@ class control_jellyfishbot {
 
         
 
-  void obtain__thruster_commands_LOS_Virtual_target(double u_d, double v_d){
+  void obtain__thruster_commands_LOS_Virtual_target(double u_d, double v_d, double xd, double yd){
         
         double Xp = atan2(yd-y,xd-x);
         //Xp = math.atan2(self.yd-self.yp,self.xd-self.xp)

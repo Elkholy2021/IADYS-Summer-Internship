@@ -371,15 +371,31 @@ class control_jellyfishbot():
             else:
                 xd = xd + (self.xp-xd)*2
                 yd = yd + (self.yp-yd)*2
-        if xd > self.xf and xd > self.xp or xd < self.xf and xd < self.xp:
-            xd = self.xf
-        if yd > self.yf and yd > self.yp or yd < self.yf and yd < self.yp:
-            yd = self.yf        
-        #5print("5555555555555")
-        # print ("xd,yd = {},{}".format(xd,yd))
-        # if self.xp == 0 and self.yp == 0:
-        #     xd = self.delta
-        #     yd = 0
+        # if xd > self.xf and xd > self.xp or xd < self.xf and xd < self.xp:
+        #     xd = self.xf
+        # if yd > self.yf and yd > self.yp or yd < self.yf and yd < self.yp:
+        #     yd = self.yf 
+        if xd > self.xf and xd > self.xp:
+            if self.xf >= self.xp:
+                xd = self.xf
+            else:
+                xd = self.xp
+        elif xd < self.xf and xd < self.xp:
+            if self.xf < self.xp:
+                xd = self.xf
+            else:
+                xd = self.xp
+        if yd > self.yf and yd > self.yp :
+            if self.yf >= self.yp:
+                yd = self.yf
+            else:
+                yd = self.yp
+        elif yd < self.yf and yd < self.yp:
+            if self.yf < self.yp:
+                yd = self.yf
+            else:
+                yd = self.yp         
+       
         return yd,xd
 
     def check_arrival(self,threshold):

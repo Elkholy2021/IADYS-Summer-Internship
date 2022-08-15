@@ -28,10 +28,12 @@ class path_generation():
 
 
     def generate_points(self):
-        if self.overlap:
-            self.points_per_side =math.ceil(self.W/float(self.R))
-        else:
-            self.points_per_side = math.floor(self.W/self.R)
+        # if self.overlap:
+        #     self.points_per_side =math.ceil(self.W/float(self.R))
+        # else:
+        #     self.points_per_side = math.floor(self.W/self.R)
+        self.points_per_side = math.floor(self.W/self.R)
+
         self.x = self.x0
         self.y = self.y0
         other_side = True

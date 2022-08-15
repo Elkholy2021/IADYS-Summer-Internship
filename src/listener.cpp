@@ -59,9 +59,14 @@ void velocity_callback(const geometry_msgs::Twist& msg)
     
 }
 int hp = 0;
+int xf_10;
+int xf_0;
+bool change_point = false;
 void pose_callback(const geometry_msgs::Pose& msg)
 {    
     hp = hp +1;
+    double threshold = 0.5;
+
     double xq =  msg.orientation.x;
     double yq =  msg.orientation.y;
     double zq =  msg.orientation.z;
@@ -87,45 +92,98 @@ void pose_callback(const geometry_msgs::Pose& msg)
         if (following_point == 1){
             ax = 0;
             ay = 0;
-            yf = 3;
-            xf = 3;
+            yf = 10;
+            xf = 0;
+            // xf_0 = 0;
+            // xf_10 = 0;
+            // change_point = false;
         }
         
+        // if (following_point > 1){
+            
+        //     if (following_point%2 == 0){
+        //         ax = xf;
+        //         ay = yf;
+        //         yf = yf;
+        //         change_point = false;
+        //     }
+        //     else{
+        //         ax = xf;
+        //         ay = yf;
+        //         yf = yf + 0.7;
+        //         change_point = false;
+        //     }
+
+        //     if (following_point = 2){
+        //         xf = 10;
+        //         xf_10 = 1;
+        //         xf_0 = 0;
+        //         change_point = false;
+        //     }
+        //     else if (following_point > 2 && change_point == true){
+        //         if (xf_10 == 1 && xf_0 ==0 ){
+        //             xf = 10;
+        //             xf_10 = 2;
+        //             xf_0 = 0;
+        //             change_point = false;
+        //         } 
+        //         else if (xf_10 =2 && xf_0 ==0 ){
+        //             xf = 0;
+        //             xf_10 = 0;
+        //             xf_0 =1;
+        //             change_point = false;
+        //         }
+        //         else if (xf_10 ==0 and xf_0 ==1){
+        //             xf = 0;
+        //             xf_0 = 2;
+        //             xf_10 = 0;
+        //             change_point = false;
+        //         }
+        //         else if (xf_10 == 0 && xf_0 == 2){
+        //             xf = 10;
+        //             xf_0 = 0;
+        //             xf_10 = 1;
+        //             change_point = false;
+        //         }
+        //     }
+
+        // }
+        
         else if (following_point == 2){
-            ax = 3;
-            ay = 3;
-            yf = 3;
-            xf = 10 ;
+            ax = 0;
+            ay = 10;
+            yf = 10;
+            xf = 0.7 ;
         }
         else if (following_point == 3){
-            ax = 10;
-            ay = 3;
-            yf = 3.7;
-            xf = 10 ;
+            ax = 0.7;
+            ay = 10;
+            yf = 0;
+            xf = 0.7 ;
         }
         else if (following_point == 4){
-            ax = 10;
-            ay = 3.7;
-            yf = 3.7;
-            xf = 0 ;
+            ax = 0.7;
+            ay = 0;
+            yf = 0;
+            xf = 1.4 ;
         }
         else if (following_point == 5){
-            ax = 0;
-            ay = 3.7;
-            yf = 4.4;
-            xf = 0;
+            ax = 1.4;
+            ay = 0;
+            yf = 10;
+            xf = 1.4;
         }  
         else if (following_point == 6){
-            ax = 0;
-            ay = 4.4;
-            yf = 4.4;
-            xf = 10;
+            ax = 1.4;
+            ay = 10;
+            yf = 10;
+            xf = 2.1;
         } 
         else if (following_point == 7){
-            ax = 10;
-            ay = 4.4;
-            yf = 5.1;
-            xf = 10;
+            ax = 2.1;
+            ay = 10;
+            yf = 0;
+            xf = 2.1;
         } 
         cout << "xf,yf: "<< xf <<","<< yf << endl;
         jellyfishbot_control_system.ax = ax;
@@ -159,34 +217,38 @@ void pose_callback(const geometry_msgs::Pose& msg)
         //     point1 = point1+1;
         //     counter = 0;
         // }
-        double threshold = 0.5;
 
         cout << "Counter: " << counter << endl;
         if (jellyfishbot_control_system.distance < threshold & following_point ==1 & counter > 100 |  jellyfishbot_control_system.getting_away){
             following_point = 2;
             counter = 0;
+            change_point = true;
         }
         else if (jellyfishbot_control_system.distance < threshold & following_point == 2 & counter > 100 |  jellyfishbot_control_system.getting_away){
             following_point = 3;
             counter = 0;
+            change_point = true;
         }
         else if (jellyfishbot_control_system.distance < threshold & following_point == 3 & counter > 100 |  jellyfishbot_control_system.getting_away){
             following_point = 4;
             counter = 0;
+            change_point = true;
         }
         else if (jellyfishbot_control_system.distance < threshold & following_point == 4 & counter > 100 |  jellyfishbot_control_system.getting_away){
             following_point = 5;
             counter = 0;
+            change_point = true;
         }
         else if (jellyfishbot_control_system.distance < threshold & following_point == 5 & counter > 100 |  jellyfishbot_control_system.getting_away){
             following_point = 6;
             counter = 0;
+            change_point = true;
         }
         else if (jellyfishbot_control_system.distance < threshold & following_point == 6 & counter > 100 |  jellyfishbot_control_system.getting_away){
             following_point = 7;
             counter = 0;
+            change_point = true;
         }
-
         double v_d= 0;
         jellyfishbot_control_system.u_d_yaw = 5; // desired surge velocity for periods of yaw motion
 
@@ -200,7 +262,7 @@ void pose_callback(const geometry_msgs::Pose& msg)
         
         if (! jellyfishbot_control_system.check_arrival(threshold) | 1 <2){
             //cout << "P4 " << endl;
-            jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d);
+            jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
             tau_L = jellyfishbot_control_system.tau_L;
             tau_R = jellyfishbot_control_system.tau_R;
             tau_M = jellyfishbot_control_system.tau_M;
@@ -237,6 +299,8 @@ void pose_callback(const geometry_msgs::Pose& msg)
 
             vt_msg.x = jellyfishbot_control_system.xd;
             vt_msg.y = jellyfishbot_control_system.yd;
+            cout << "ZZZ xd,yd: " << jellyfishbot_control_system.xd <<","<<jellyfishbot_control_system.yd<<endl; 
+
             // msg_tau_L.data = 5;
             // msg_tau_R.data = 5;
             // msg_tau_M.data = 0;

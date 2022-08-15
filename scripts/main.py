@@ -24,7 +24,7 @@ path.L = 10
 path.R = 0.70
 path.x0 =3
 path.y0 = 3
-path.alpha = 40
+path.alpha = 0
 
 
 
@@ -146,38 +146,38 @@ def pose_callback(message):
         if following_point == 1:
             ax = 0
             ay = 0
-            yf = 3 #0
-            xf = 3 #-10 
+            yf = 10 #0
+            xf = 0 #-10 
         if following_point == 2:
-            ax = 3
-            ay = 3
-            yf = 3
-            xf = 10 
+            ax = 0
+            ay = 10
+            yf = 10
+            xf = 0.7 
         elif following_point == 3:
-            ax = 10
-            ay = 3
-            yf = 3.7
-            xf = 10 
+            ax = 0.7
+            ay = 10
+            yf = 0
+            xf = 0.7 
         elif following_point == 4:
-            ax = 10
-            ay = 3.7
-            yf = 3.7
-            xf = 0  
+            ax = 0.7
+            ay = 0
+            yf = 0
+            xf = 1.4  
         elif following_point == 5:
-            ax = 0
-            ay = 3.7
-            yf = 4.4
-            xf = 0  
+            ax = 1.4
+            ay = 0
+            yf = 10
+            xf = 1.4 
         elif following_point == 6:
-            ax = 0
-            ay = 4.4
-            yf = 4.4
-            xf = 10
+            ax = 1.4
+            ay = 10
+            yf = 10
+            xf = 2.1
         elif following_point == 7:
-            ax = 10
-            ay = 4.4
-            yf = 5.1
-            xf = 10    
+            ax = 2.1
+            ay = 10
+            yf = 0
+            xf = 2.1    
         #jellyfishbot_control_system.Yp = Yp 
         jellyfishbot_control_system.ax = ax
         jellyfishbot_control_system.ay = ay
