@@ -9,19 +9,23 @@ using namespace std;
 
 class calculate_speads{
     public:
-        double x0;
-        double y0;
-        double timeStamp0;
-        double x,y;
-        double distance;
-        double velocity;
-    double PI = 3.14159265;
-    struct Point
-    {
-    double x;
-    double y;
-    double z;
-    };
+
+        double timeStamp0 = 10;
+        double distance = 0;
+        double velocity = 0;
+        double timeStamp = 0;
+        double PI = 3.14159265;
+        struct Point
+        {
+        double x;
+        double y;
+        double z;
+        };
+       
+        double latitude1 = 0;
+        double longitude1 = 0;
+        double latitude2 = 0;
+        double longitude2 = 0;
 
     double degreeToRadian(const double degree)
     {
@@ -33,26 +37,34 @@ class calculate_speads{
     return (radian * 180 / PI);
     };
 
-    double CoordinatesToMeters(double latitude1,
-                            double longitude1,
-                            double latitude2,
-                            double longitude2)
+
+
+    double CoordinatesToMeters()
     {
-    latitude1 = degreeToRadian(latitude1);
-    longitude1 = degreeToRadian(longitude1);
-    latitude2 = degreeToRadian(latitude2);
-    longitude2 = degreeToRadian(longitude2);
+        
+        latitude1 = degreeToRadian(latitude1);
+        longitude1 = degreeToRadian(longitude1);
+        latitude2 = degreeToRadian(latitude2);
+        longitude2 = degreeToRadian(longitude2);
 
-    double earthDiameterMeters = 12756000; 
+        double earthDiameterMeters = 12756000; 
 
-    auto x = sin((latitude2 - latitude1) / 2), y = sin((longitude2 - longitude1) / 2);
-    if (true) {
-    return earthDiameterMeters * asin(sqrt((x * x) + (cos(latitude1) * cos(latitude2) * y * y)));}
-    else{
-    auto value = (x * x) + (cos(latitude1) * cos(latitude2) * y * y);
-    return earthDiameterMeters * atan2(sqrt(value), sqrt(1 - value));}
+        auto x = sin((latitude2 - latitude1) / 2), y = sin((longitude2 - longitude1) / 2);
+        if (true) {
+            distance = earthDiameterMeters * asin(sqrt((x * x) + (cos(latitude1) * cos(latitude2) * y * y)));
+            return distance;
+        
+        }
+        else{
+            auto value = (x * x) + (cos(latitude1) * cos(latitude2) * y * y);
+            distance = earthDiameterMeters * atan2(sqrt(value), sqrt(1 - value));
+            return distance;
+            }
 
     }
+
+
+
     double CoordinatesToAngle(double latitude1,
                             const double longitude1,
                             double latitude2,
@@ -84,7 +96,7 @@ class calculate_speads{
     auto angle = CoordinatesToAngle(latitude1, longitude1, latitude2, longitude2);
     // cout << "Angle =  " << angle << endl;
 
-    auto meters = CoordinatesToMeters(latitude1, longitude1, latitude2, longitude2);
+    auto meters = CoordinatesToMeters();
     // cout << "Meters = " << meters << endl;
 
 
@@ -98,15 +110,10 @@ class calculate_speads{
     p.y = meters * sin(degreeToRadian(angle));
     return p;
     }
-    void calculate_spead(double heading, double lat,double lon,double timeStamp){
-        //x,y = GPStoMETER(lat,lon);
-        distance = sqrt(pow(y-y0,2)+pow(x-x0,2));
+    double calculate_spead(){
+
         velocity = distance / (timeStamp - timeStamp0);
-
-
-
-
-
+        return velocity;
 
     }
 };
@@ -114,9 +121,24 @@ class calculate_speads{
 calculate_speads calculate_speads_algorithm;
 
 int main(){
+struct PointGPS
+    {
+    double lat;
+    double lon;
+    };
+PointGPS P0;
+PointGPS P;
 
-double distance = calculate_speads_algorithm.CoordinatesToMeters(43.213552, 5.536321,43.213897, 5.536085);
 
-cout << distance << endl;
- 
+calculate_speads_algorithm.latitude1 = 43.213552;
+calculate_speads_algorithm.longitude1 = 5.536321;
+calculate_speads_algorithm. latitude2 = 43.213897;
+calculate_speads_algorithm.longitude2 = 5.536085;
+calculate_speads_algorithm.timeStamp = 18.5782;
+double distance = calculate_speads_algorithm.CoordinatesToMeters();
+double velocity = calculate_speads_algorithm.calculate_spead();
+
+cout << "distance: " <<distance << endl;
+cout << "velocity: " <<velocity << endl;
+
 }
