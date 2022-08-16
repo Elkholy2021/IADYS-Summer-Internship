@@ -7,7 +7,13 @@
 
 using namespace std;
 
-
+struct Point
+        {
+        double x;
+        double y;
+        double z;
+        };
+        
 class calculate_speads{
     public:
 
@@ -16,25 +22,19 @@ class calculate_speads{
         double velocity = 0;
         double timeStamp;
         double PI = 3.14159265;
-        struct Point
-        {
-        double x;
-        double y;
-        double z;
-        };
         
        
-        double latitude1 = 100;
-        double longitude1 = 0;
-        double latitude2 = 0;
-        double longitude2 = 0;
+        double Clatitude1 = 0;
+        double Clongitude1 = 0;
+        double Clatitude2 = 0;
+        double Clongitude2 = 0;
         double imuHeading = 0;
         double imuHeading0 = 0;
         double gpsHeading = 0;
-        double latitudeR1;
-        double longitudeR1;
-        double latitudeR2;
-        double longitudeR2;
+        // double latitudeR1;
+        // double longitudeR1;
+        // double latitudeR2;
+        // double longitudeR2;
 
     double degreeToRadian(const double degree)
     {
@@ -48,24 +48,24 @@ class calculate_speads{
 
 
 
-    double CoordinatesToMeters()
+    double CoordinatesToMeters(double latitude1 , double longitude1 , double latitude2 , double longitude2)
     {
         
-        latitudeR1 = degreeToRadian(latitude1);
-        longitudeR1 = degreeToRadian(longitude1);
-        latitudeR2 = degreeToRadian(latitude2);
-        longitudeR2 = degreeToRadian(longitude2);
+        latitude1 = degreeToRadian(latitude1);
+        longitude1 = degreeToRadian(longitude1);
+        latitude2 = degreeToRadian(latitude2);
+        longitude2 = degreeToRadian(longitude2);
 
         double earthDiameterMeters = 12756000; 
 
-        auto x = sin((latitudeR2 - latitudeR1) / 2), y = sin((longitudeR2 - longitudeR1) / 2);
+        auto x = sin((latitude2 - latitude1) / 2), y = sin((longitude2 - longitude1) / 2);
         if (true) {
-            distance = earthDiameterMeters * asin(sqrt((x * x) + (cos(latitudeR1) * cos(latitudeR2) * y * y)));
+            distance = earthDiameterMeters * asin(sqrt((x * x) + (cos(latitude1) * cos(latitude2) * y * y)));
             return distance;
         
         }
         else{
-            auto value = (x * x) + (cos(latitudeR1) * cos(latitudeR2) * y * y);
+            auto value = (x * x) + (cos(latitude1) * cos(latitude2) * y * y);
             distance = earthDiameterMeters * atan2(sqrt(value), sqrt(1 - value));
             return distance;
             }
@@ -74,17 +74,17 @@ class calculate_speads{
 
 
 
-    double CoordinatesToAngle()
+    double CoordinatesToAngle(double latitude1 , double longitude1 , double latitude2 , double longitude2)
     {
         const auto longitudeDifference = degreeToRadian(longitude2 - longitude1);
-        latitudeR1 = degreeToRadian(latitude1);
-        latitudeR2 = degreeToRadian(latitude2);
+        latitude1 = degreeToRadian(latitude1);
+        latitude2 = degreeToRadian(latitude2);
 
 
 
-        const auto x = (cos(latitudeR1) * sin(latitudeR2)) -
-                        (sin(latitudeR1) * cos(latitudeR2) * cos(longitudeDifference));
-        const auto y = sin(longitudeDifference) * cos(latitudeR2);
+        const auto x = (cos(latitude1) * sin(latitude2)) -
+                        (sin(latitude1) * cos(latitude2) * cos(longitudeDifference));
+        const auto y = sin(longitudeDifference) * cos(latitude2);
 
 
 
@@ -95,16 +95,16 @@ class calculate_speads{
     }
 
 
-    Point gpsToCoordinatesInMeter()
+    Point gpsToCoordinatesInMeter(double latitude1 , double longitude1 , double latitude2 , double longitude2)
     {
     Point p;
 
 
 
-    auto angle = CoordinatesToAngle();
+    auto angle = CoordinatesToAngle( latitude1 ,  longitude1 ,  latitude2 ,  longitude2);
     // cout << "Angle =  " << angle << endl;
 
-    auto meters = CoordinatesToMeters();
+    auto meters = CoordinatesToMeters( latitude1 ,  longitude1 ,  latitude2 ,  longitude2);
     // cout << "Meters = " << meters << endl;
 
 
@@ -114,8 +114,10 @@ class calculate_speads{
 
 
 
-    p.x = meters * cos(degreeToRadian(angle));
-    p.y = meters * sin(degreeToRadian(angle));
+    // p.x = meters * cos(degreeToRadian(angle));
+    // p.y = meters * sin(degreeToRadian(angle));
+    p.x = meters * cos(angle);
+    p.y = meters * sin(angle);
     return p;
     }
     double calculate_velocity(){
