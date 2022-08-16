@@ -7,6 +7,13 @@
 #include <vector>
 #include <utility>
 using namespace std;
+double PI = 3.14159265;
+struct Point
+{
+double x;
+double y;
+double z;
+};
 
 double degreeToRadian(const double degree)
 {
@@ -28,16 +35,15 @@ double CoordinatesToMeters(double latitude1,
   latitude2 = degreeToRadian(latitude2);
   longitude2 = degreeToRadian(longitude2);
 
+double earthDiameterMeters = 12756000; 
 
-
- using namespace std;
   auto x = sin((latitude2 - latitude1) / 2), y = sin((longitude2 - longitude1) / 2);
-#if 1
-  return earthDiameterMeters * asin(sqrt((x * x) + (cos(latitude1) * cos(latitude2) * y * y)));
-#else
+if (true) {
+  return earthDiameterMeters * asin(sqrt((x * x) + (cos(latitude1) * cos(latitude2) * y * y)));}
+else{
   auto value = (x * x) + (cos(latitude1) * cos(latitude2) * y * y);
-  return earthDiameterMeters * atan2(sqrt(value), sqrt(1 - value));
-#endif
+  return earthDiameterMeters * atan2(sqrt(value), sqrt(1 - value));}
+
 }
 double CoordinatesToAngle(double latitude1,
                           const double longitude1,
@@ -50,7 +56,6 @@ double CoordinatesToAngle(double latitude1,
 
 
 
- using namespace std;
   const auto x = (cos(latitude1) * sin(latitude2)) -
                  (sin(latitude1) * cos(latitude2) * cos(longitudeDifference));
   const auto y = sin(longitudeDifference) * cos(latitude2);
@@ -68,12 +73,10 @@ Point gpsToCoordinatesInMeter(double latitude1, double longitude1, double latitu
 
 
 
- auto angle = CoordinatesToAngle(latitude1, longitude1, latitude2, longitude2);
+  auto angle = CoordinatesToAngle(latitude1, longitude1, latitude2, longitude2);
   // cout << "Angle =  " << angle << endl;
 
-
-
- auto meters = CoordinatesToMeters(latitude1, longitude1, latitude2, longitude2);
+  auto meters = CoordinatesToMeters(latitude1, longitude1, latitude2, longitude2);
   // cout << "Meters = " << meters << endl;
 
 
@@ -83,13 +86,25 @@ Point gpsToCoordinatesInMeter(double latitude1, double longitude1, double latitu
 
 
 
- p.x = meters * cos(degreeToRadian(angle));
-p.y = meters * sin(degreeToRadian(angle));
+  p.x = meters * cos(degreeToRadian(angle));
+  p.y = meters * sin(degreeToRadian(angle));
   return p;
 }
 
+// p1 = 43.213660, 5.536258
+// p2 = 43.214156, 5.535963
 
 
 
 
+int main(){
+  
+double distance = CoordinatesToMeters(43.213552, 5.536321,43.213897, 5.536085);
+
+Point pointm = gpsToCoordinatesInMeter(43.213552, 5.536321,43.213897, 5.536085);
+cout << distance << endl;
+cout << pointm.x << endl;
+cout << pointm.y << endl;
+
+}
 
