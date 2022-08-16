@@ -5,7 +5,12 @@
 #include <utility>
 using namespace std;
 
-
+struct Speeds
+        {
+        double u;
+        double v;
+        double r;
+        };
 
 class calculate_speads{
     public:
@@ -21,20 +26,24 @@ class calculate_speads{
         double y;
         double z;
         };
+        
        
         double latitude1 = 0;
         double longitude1 = 0;
         double latitude2 = 0;
         double longitude2 = 0;
+        double imuHeading = 0;
+        double imuHeading0 = 0;
+        double gpsHeading = 0;
 
     double degreeToRadian(const double degree)
     {
-    return (degree * PI / 180);
+        return (degree * PI / 180);
     };
 
     double radianToDegree(const double radian)
     {
-    return (radian * 180 / PI);
+        return (radian * 180 / PI);
     };
 
 
@@ -65,35 +74,34 @@ class calculate_speads{
 
 
 
-    double CoordinatesToAngle(double latitude1,
-                            const double longitude1,
-                            double latitude2,
-                            const double longitude2)
+    double CoordinatesToAngle()
     {
-    const auto longitudeDifference = degreeToRadian(longitude2 - longitude1);
-    latitude1 = degreeToRadian(latitude1);
-    latitude2 = degreeToRadian(latitude2);
+        const auto longitudeDifference = degreeToRadian(longitude2 - longitude1);
+        latitude1 = degreeToRadian(latitude1);
+        latitude2 = degreeToRadian(latitude2);
 
 
 
-    const auto x = (cos(latitude1) * sin(latitude2)) -
-                    (sin(latitude1) * cos(latitude2) * cos(longitudeDifference));
-    const auto y = sin(longitudeDifference) * cos(latitude2);
+        const auto x = (cos(latitude1) * sin(latitude2)) -
+                        (sin(latitude1) * cos(latitude2) * cos(longitudeDifference));
+        const auto y = sin(longitudeDifference) * cos(latitude2);
 
 
 
-    const auto degree = radianToDegree(atan2(y, x));
-    return (degree >= 0) ? degree : (degree + 360);
+        const auto degree = radianToDegree(atan2(y, x));
+        //return (degree >= 0) ? degree : (degree + 360);
+        gpsHeading = degreeToRadian(degree);
+        return gpsHeading;
     }
 
 
-    Point gpsToCoordinatesInMeter(double latitude1, double longitude1, double latitude2, double longitude2)
+    Point gpsToCoordinatesInMeter()
     {
     Point p;
 
 
 
-    auto angle = CoordinatesToAngle(latitude1, longitude1, latitude2, longitude2);
+    auto angle = CoordinatesToAngle();
     // cout << "Angle =  " << angle << endl;
 
     auto meters = CoordinatesToMeters();
@@ -110,35 +118,43 @@ class calculate_speads{
     p.y = meters * sin(degreeToRadian(angle));
     return p;
     }
-    double calculate_spead(){
+    double calculate_velocity(){
 
         velocity = distance / (timeStamp - timeStamp0);
         return velocity;
 
     }
+    Speeds calculate_speeds(){
+
+        Speeds Vs;
+        Vs.u = velocity*cos(imuHeading-gpsHeading);
+        Vs.v = velocity*sin(imuHeading-gpsHeading);
+        Vs.r = (imuHeading - imuHeading0)/(timeStamp - timeStamp0);
+        return Vs;
+
+
+    }
 };
 
 calculate_speads calculate_speads_algorithm;
-
 int main(){
-struct PointGPS
-    {
-    double lat;
-    double lon;
-    };
-PointGPS P0;
-PointGPS P;
 
 
 calculate_speads_algorithm.latitude1 = 43.213552;
 calculate_speads_algorithm.longitude1 = 5.536321;
-calculate_speads_algorithm. latitude2 = 43.213897;
-calculate_speads_algorithm.longitude2 = 5.536085;
+calculate_speads_algorithm. latitude2 = 43.213086 ;//43.213897;
+calculate_speads_algorithm.longitude2 = 5.536408; //5.536085;
 calculate_speads_algorithm.timeStamp = 18.5782;
-double distance = calculate_speads_algorithm.CoordinatesToMeters();
-double velocity = calculate_speads_algorithm.calculate_spead();
+calculate_speads_algorithm.imuHeading = 2.957;
 
-cout << "distance: " <<distance << endl;
-cout << "velocity: " <<velocity << endl;
+double distance = calculate_speads_algorithm.CoordinatesToMeters();
+double velocity = calculate_speads_algorithm.calculate_velocity();
+double angle = calculate_speads_algorithm.CoordinatesToAngle();
+Speeds Vs = calculate_speads_algorithm.calculate_speeds();
+cout << "distance: " << distance << endl;
+cout << "velocity: " << velocity << endl;
+cout << "angle: " << angle << endl;
+cout << "u: " << Vs.u << " ,v: " << Vs.v<< " ,r: " << Vs.r << endl;
+
 
 }
