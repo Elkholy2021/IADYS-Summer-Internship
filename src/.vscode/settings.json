@@ -5,6 +5,7 @@
         "random": "cpp",
         "cmath": "cpp",
         "unordered_map": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "iomanip": "cpp"
     }
 }

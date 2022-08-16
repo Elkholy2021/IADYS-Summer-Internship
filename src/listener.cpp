@@ -4,11 +4,13 @@
 
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Vector3.h"
-
+#include "sensor_msgs/NavSatFix.h"
 #include "geometry_msgs/Pose.h"
 #include "control_law.cpp"
-control_jellyfishbot jellyfishbot_control_system;
+#include "calculate_speed.cpp"
 
+control_jellyfishbot jellyfishbot_control_system;
+calculate_speads calculate_speads_algorithm;
 struct Quaternion {
     double w, x, y, z;
     };
@@ -16,6 +18,13 @@ struct Quaternion {
     struct EulerAngles {
         double roll, pitch, yaw;
     };
+struct Speeds
+        {
+        double u;
+        double v;
+        double r;
+        };
+
 int following_point = 1;
 int counter = 0;
 int point1 = 0;
@@ -48,6 +57,7 @@ EulerAngles ToEulerAngles(Quaternion q) {
         return angles;
     }
 int hv = 0;
+
 void velocity_callback(const geometry_msgs::Twist& msg)
 {   
     hv = hv +1;
@@ -58,6 +68,29 @@ void velocity_callback(const geometry_msgs::Twist& msg)
     //cout << "I got in the velocity callback: "<< hv << endl; 
     
 }
+int counter_gps = 0;
+void gps_callback(const sensor_msgs::NavSatFix& msg)
+    {   
+    calculate_speads_algorithm.latitude1 = calculate_speads_algorithm.latitude2;
+    calculate_speads_algorithm.longitude1 = calculate_speads_algorithm.longitude2;
+    calculate_speads_algorithm.timeStamp0 = calculate_speads_algorithm.timeStamp;
+    calculate_speads_algorithm.latitude2 = msg.latitude;
+    calculate_speads_algorithm.longitude2 = msg.longitude;
+    calculate_speads_algorithm.timeStamp = msg.header.stamp.sec;
+    cout << "msg.header.stamp " << calculate_speads_algorithm.timeStamp << endl;
+
+
+    cout << "heheheheheh" << endl;
+    cout << "lat1: "<< calculate_speads_algorithm.latitude1<< " ,lon1: "<< calculate_speads_algorithm.longitude1 << endl;
+    cout << "lat2: "<< calculate_speads_algorithm.latitude2<< " ,lon2: "<< calculate_speads_algorithm.longitude2 << endl;
+    double distance = calculate_speads_algorithm.CoordinatesToMeters();
+    double velocity = calculate_speads_algorithm.calculate_velocity();
+    double angle = calculate_speads_algorithm.CoordinatesToAngle();
+    cout << "distance: " << distance << endl;
+    cout << "velocity: " << velocity << endl;
+    cout << "angle: " << angle << endl;
+    
+    }
 int hp = 0;
 int xf_10;
 int xf_0;
@@ -323,6 +356,7 @@ void pose_callback(const geometry_msgs::Pose& msg)
     void listener(ros::NodeHandle node,ros::Publisher pub_thrust_l,ros::Publisher pub_thrust_r,ros::Publisher pub_thrust_tt){
         ros::Subscriber sub1 = node.subscribe("/robot_twist_bff", 1000, velocity_callback);
         ros::Subscriber sub2 = node.subscribe("/robot_pose", 1000, pose_callback);
+        ros::Subscriber sub3 = node.subscribe("/positionGPS", 1000, gps_callback);
         //ros::Subscriber sub3 = node.subscribe("/robot_twist_bff", 1000, velocity_callback2);
 
         ros::spin();
