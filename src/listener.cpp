@@ -18,12 +18,7 @@ struct Quaternion {
     struct EulerAngles {
         double roll, pitch, yaw;
     };
-struct Speeds
-        {
-        double u;
-        double v;
-        double r;
-        };
+
 
 int following_point = 1;
 int counter = 0;

@@ -13,7 +13,12 @@ struct Point
         double y;
         double z;
         };
-        
+struct Speeds
+        {
+        double u;
+        double v;
+        double r;
+        };
 class calculate_speads{
     public:
 
@@ -126,16 +131,16 @@ class calculate_speads{
         return velocity;
 
     }
-    // Speeds calculate_speeds(){
+    Speeds calculate_speeds(){
 
-    //     Speeds Vs;
-    //     Vs.u = velocity*cos(imuHeading-gpsHeading);
-    //     Vs.v = velocity*sin(imuHeading-gpsHeading);
-    //     Vs.r = (imuHeading - imuHeading0)/(timeStamp - timeStamp0);
-    //     return Vs;
+        Speeds Vs;
+        Vs.u = velocity*cos(imuHeading-gpsHeading);
+        Vs.v = velocity*sin(imuHeading-gpsHeading);
+        Vs.r = (imuHeading - imuHeading0)/(timeStamp - timeStamp0);
+        return Vs;
 
 
-    //}
+    }
 };
 
 // calculate_speads calculate_speads_algorithm;
