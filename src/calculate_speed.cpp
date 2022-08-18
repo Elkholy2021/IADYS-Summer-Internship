@@ -22,10 +22,8 @@ struct Speeds
 class calculate_speads{
     public:
 
-        double timeStamp0;
         double distance = 0;
         double velocity = 0;
-        double timeStamp;
         double PI = 3.14159265;
         
        
@@ -33,9 +31,10 @@ class calculate_speads{
         double Clongitude1 = 0;
         double Clatitude2 = 0;
         double Clongitude2 = 0;
-        double imuHeading = 0;
-        double imuHeading0 = 0;
+        double imuHeading;
+        double imuHeading0 ;
         double gpsHeading = 0;
+        double heading_correction;
         // double latitudeR1;
         // double longitudeR1;
         // double latitudeR2;
@@ -127,7 +126,7 @@ class calculate_speads{
     }
     double calculate_velocity(){
 
-        velocity = distance / (timeStamp - timeStamp0);
+        velocity = distance /1; //gps freq is 1hz
         return velocity;
 
     }
@@ -136,7 +135,8 @@ class calculate_speads{
         Speeds Vs;
         Vs.u = velocity*cos(imuHeading-gpsHeading);
         Vs.v = velocity*sin(imuHeading-gpsHeading);
-        Vs.r = (imuHeading - imuHeading0)/(timeStamp - timeStamp0);
+        Vs.r = (imuHeading - imuHeading0)/0.2; //imu freq is 5hz
+        cout << "imuHeading0: "<<imuHeading0 << ", imuHeading: " << imuHeading <<endl;
         return Vs;
 
 

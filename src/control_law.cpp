@@ -42,6 +42,7 @@ class control_jellyfishbot {
       ros::Publisher pub_thrust_tt;
       ros::Publisher pp_topic;
       ros::Publisher vt_topic;
+      ros::Publisher velocities_topic;
 
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration

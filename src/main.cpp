@@ -53,19 +53,24 @@ EulerAngles ToEulerAngles(Quaternion q) {
     }
 int hv = 0;
 
-void velocity_callback(const geometry_msgs::Twist& msg)
-{   
-    hv = hv +1;
-    //ROS_INFO("[Listener] I heard speed: [%f]\n",u);
-    jellyfishbot_control_system.u = msg.linear.x;
-    jellyfishbot_control_system.v = msg.linear.y;
-    jellyfishbot_control_system.r = msg.angular.z;
-    //cout << "I got in the velocity callback: "<< hv << endl; 
+// void velocity_callback(const geometry_msgs::Twist& msg)
+// {   
+//     hv = hv +1;
+//     //ROS_INFO("[Listener] I heard speed: [%f]\n",u);
+//     jellyfishbot_control_system.u = msg.linear.x;
+//     jellyfishbot_control_system.v = msg.linear.y;
+//     jellyfishbot_control_system.r = msg.angular.z;
+//     //cout << "I got in the velocity callback: "<< hv << endl; 
     
-}
+// }
 int counter_gps = 0;
 double latitude0;
 double longitude0;
+void heading_correction_callback(const std_msgs::Float32& msg){
+    calculate_speads_algorithm.heading_correction = calculate_speads_algorithm.degreeToRadian(msg.data);
+    cout << "Heading correction: "<< calculate_speads_algorithm.heading_correction << endl;
+
+}
 void gps_callback(const sensor_msgs::NavSatFix& msg)
     {   
     counter_gps = counter_gps + 1;
@@ -75,14 +80,10 @@ void gps_callback(const sensor_msgs::NavSatFix& msg)
     }
     calculate_speads_algorithm.Clatitude1 = calculate_speads_algorithm.Clatitude2;
     calculate_speads_algorithm.Clongitude1 = calculate_speads_algorithm.Clongitude2;
-    calculate_speads_algorithm.timeStamp0 = calculate_speads_algorithm.timeStamp;
     calculate_speads_algorithm.Clatitude2 = msg.latitude;
     calculate_speads_algorithm.Clongitude2 = msg.longitude;
-    calculate_speads_algorithm.timeStamp = msg.header.stamp.sec;
-    cout << "msg.header.stamp " << calculate_speads_algorithm.timeStamp << endl;
 
 
-    cout << "heheheheheh" << endl;
     cout << "lat1: "<< calculate_speads_algorithm.Clatitude1<< " ,lon1: "<< calculate_speads_algorithm.Clongitude1 << endl;
     cout << "lat2: "<< calculate_speads_algorithm.Clatitude2<< " ,lon2: "<< calculate_speads_algorithm.Clongitude2 << endl;
     double distance = calculate_speads_algorithm.CoordinatesToMeters(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2 );
@@ -95,9 +96,18 @@ void gps_callback(const sensor_msgs::NavSatFix& msg)
     cout << "angle: " << angle << endl;
     cout << "x,y: " << Pm.x << "," << Pm.y << endl;
     cout << "u: " << Vs.u << " ,v: " << Vs.v<< " ,r: " << Vs.r << endl;
+    geometry_msgs::Quaternion velocities;
+    velocities.x = Vs.u;
+    velocities.y = Vs.v;
+    velocities.z = Vs.r;
+    velocities.w = velocity;
+    jellyfishbot_control_system.velocities_topic.publish(velocities);
 
     jellyfishbot_control_system.x = Pm.x;
     jellyfishbot_control_system.y = Pm.y;
+    jellyfishbot_control_system.u = Vs.u;
+    jellyfishbot_control_system.v = Vs.v;
+    jellyfishbot_control_system.r = Vs.r;
     // geometry_msgs::Vector3 pp_msg;
     // pp_msg.x = Pm.x;
     // pp_msg.y = Pm.y;
@@ -112,7 +122,7 @@ void imu_callback(const geometry_msgs::Quaternion& msg)
 {    
     hp = hp +1;
     double threshold = 0.5;
-
+    cout << "Yaw angle: " << endl;
     double xq =  msg.x;
     double yq =  msg.y;
     double zq =  msg.z;
@@ -125,6 +135,8 @@ void imu_callback(const geometry_msgs::Quaternion& msg)
     q.w = wq;
     EulerAngles = ToEulerAngles(q);
     jellyfishbot_control_system.psi = EulerAngles.yaw;
+    calculate_speads_algorithm.imuHeading0 = calculate_speads_algorithm.imuHeading;
+    calculate_speads_algorithm.imuHeading = EulerAngles.yaw + calculate_speads_algorithm.heading_correction;
     cout << "Yaw angle: " << jellyfishbot_control_system.psi <<endl;
     //cout << "I got in the pose callback: "<< hp << endl; 
     
@@ -358,7 +370,7 @@ void imu_callback(const geometry_msgs::Quaternion& msg)
             jellyfishbot_control_system.pub_thrust_tt.publish(msg_tau_M);
             jellyfishbot_control_system.pp_topic.publish(pp_msg);
             jellyfishbot_control_system.vt_topic.publish(vt_msg);
-	    
+
        
 
        
@@ -368,8 +380,10 @@ void imu_callback(const geometry_msgs::Quaternion& msg)
     void listener(ros::NodeHandle node,ros::Publisher pub_thrust_l,ros::Publisher pub_thrust_r,ros::Publisher pub_thrust_tt){
         //ros::Subscriber sub1 = node.subscribe("/robot_twist_bff", 1000, velocity_callback);
         //ros::Subscriber sub2 = node.subscribe("/robot_pose", 1000, pose_callback);
+        ros::Subscriber sub4 = node.subscribe("/eulerIMU", 1000, imu_callback);
+
         ros::Subscriber sub3 = node.subscribe("/positionGPS", 1000, gps_callback);
-        ros::Subscriber sub4 = node.subscribe("/eularIMU", 1000, imu_callback);
+        ros::Subscriber sub5 = node.subscribe("/heading_correction", 1000, heading_correction_callback);
         //ros::Subscriber sub3 = node.subscribe("/robot_twist_bff", 1000, velocity_callback2);
 
         ros::spin();
@@ -395,13 +409,14 @@ int main(int argc, char **argv)
     ros::Publisher pub_thrust_tt = node.advertise<std_msgs::Float32>(thT, 1000);
     ros::Publisher pp_topic = node.advertise<geometry_msgs::Vector3>("/projected_point_topic", 1000);
     ros::Publisher vt_topic = node.advertise<geometry_msgs::Vector3>("/virtual_target_topic", 1000);
+    ros::Publisher velocities_topic = node.advertise<geometry_msgs::Quaternion >("/velocities", 1000);
 
     jellyfishbot_control_system.pub_thrust_l = pub_thrust_l;
     jellyfishbot_control_system.pub_thrust_r = pub_thrust_r;
     jellyfishbot_control_system.pub_thrust_tt = pub_thrust_tt;
     jellyfishbot_control_system.pp_topic = pp_topic;
     jellyfishbot_control_system.vt_topic = vt_topic;
-    
+    jellyfishbot_control_system.velocities_topic = velocities_topic;
     
     // ros::Publisher pub_thrust_l = node.advertise<std_msgs::Float32>(thL, 1000);
     // ros::Publisher pub_thrust_r = node.advertise<std_msgs::Float32>(thR, 1000);
