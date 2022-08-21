@@ -6,6 +6,8 @@
         "cmath": "cpp",
         "unordered_map": "cpp",
         "complex": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "utility": "cpp",
+        "vector": "cpp"
     }
 }

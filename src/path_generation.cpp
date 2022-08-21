@@ -10,31 +10,37 @@ using namespace std;
 #include <iomanip>
 #include <vector>
 #include <utility>
+#define points_per_side 6
+struct demo{
+        //array declared inside structure
+        double arr[2][points_per_side+2];
+      };
+double W = 20;
+double L = 8;
+double R = 3;
 
-class path_generation {        
+class path_generation{        
   public:
       double W , L , R , x0 , y0 , alpha;
-      int points_per_side; 
+      //int points_per_side = 6; 
       double x , y;
       bool other_side;
       
-  void init_path(){
-      points_per_side = floor(W/R);
       
-  }
-  void generate_points(){
       
-      double points[2][floor(W/R)*2+1];
-
-      points[0][0] = 0;
-      points[1][0] = 0;
+ 
+  struct demo generate_points(){
+      
+      struct demo points;
+      points.arr[0][0] = 0;
+      points.arr[1][0] = 0;
       x = x0;
       y = y0;
       other_side = true;
       for (int i = 0; i <= points_per_side; ++i) {
         //cout << i << " ";
-        points[0][i+1] = x;
-        points[1][i+1] = y;
+        points.arr[0][i+1] = x;
+        points.arr[1][i+1] = y;
         if (other_side == true){
           if (x == x0 + L){
             x = x - L;
@@ -56,19 +62,25 @@ class path_generation {
 
 
     }
-
+  return points;
   }
 };
 int main(){
+
   path_generation path_generation;
-  path_generation.W = 20;
-  path_generation.L = 8;
-  path_generation.R = 3;
+  struct demo points;
+  path_generation.W = W;
+  path_generation.L = L;
+  path_generation.R = R;
   path_generation.x0 = 2;
   path_generation.y0 = 2;
   path_generation.alpha = 0;
-  path_generation.init_path();
-  path_generation.generate_points();
-  for (int i = 0; i <= floor(path_generation.W/path_generation.R); ++i) {
-    cout << path_generation.points[0][i+1] << "," << path_generation.points[1][i+1]<< endl;;
+  //path_generation.init_path();
+  points = path_generation.generate_points();
+  for(int i=0;i<points_per_side+2;i++)
+	{
+		cout<<points.arr[0][i]<<","<<points.arr[1][i]<<endl;;
+	}
+  return 0;
+  
 }
