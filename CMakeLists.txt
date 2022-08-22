@@ -135,6 +135,9 @@ target_link_libraries (listener_node ${catkin_LIBRARIES})
 #main
 add_executable(main_node src/main.cpp)
 target_link_libraries (main_node ${catkin_LIBRARIES})
+#testing_main
+add_executable(testing_node src/testing_main.cpp)
+target_link_libraries (testing_node ${catkin_LIBRARIES})
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure

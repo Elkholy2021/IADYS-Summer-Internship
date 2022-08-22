@@ -78,76 +78,8 @@ void heading_correction_callback(const std_msgs::Float32& msg){
     //cout << "Heading correction: "<< calculate_speads_algorithm.heading_correction << endl;
 
 }
-void gps_callback(const sensor_msgs::NavSatFix& msg)
-    {  
-    counter_gps = counter_gps + 1;
-    if (counter_gps < wait_time){
-        cout << "waiting ... time left: "<< wait_time - counter_gps +1 << endl;
-    }
-    if (counter_gps == wait_time){ //initial position
-        meterPoints.arr[0][0] = 0;
-        meterPoints.arr[1][0] = 0;
-
-        gpsPoints.arr[0][0] = msg.latitude; 
-        gpsPoints.arr[1][0] =  msg.longitude; 
-
-        gpsPoints.arr[0][1] = 43.213892;
-        gpsPoints.arr[1][1] = 5.536114;
-
-        gpsPoints.arr[0][2] = 43.213923;
-        gpsPoints.arr[1][2] = 5.536211;
-
-        gpsPoints.arr[0][3] = 43.213612;
-        gpsPoints.arr[1][3] = 5.536380;
-
-        gpsPoints.arr[0][4] = 43.213900;
-        gpsPoints.arr[1][4] = 5.536200;
-
-        conversion.Clatitude1 = gpsPoints.arr[0][0];
-        conversion.Clongitude1 = gpsPoints.arr[1][0];
-        for (int i = 1; i < number_points; ++i) {
-            //cout << "i: "<< i<< endl;
-            conversion.Clatitude2 = gpsPoints.arr[0][i]; 
-            conversion.Clongitude2 = gpsPoints.arr[1][i];  
-            pm = conversion.gpsToCoordinatesInMeter(conversion.Clatitude1,conversion.Clongitude1,conversion.Clatitude2,conversion.Clongitude2);
-            meterPoints.arr[0][i] = pm.x;
-            meterPoints.arr[1][i] = pm.y;
-        }
-    }
-    // for (int i = 0; i < 5; i++){
-    // cout <<"x,y: "<<meterPoints.arr[0][i] <<","<<meterPoints.arr[1][i]<<endl;
-    // }
-    
-    if (counter_gps == wait_time){
-        latitude0 = msg.latitude;
-        longitude0 = msg.longitude;
-    }
-    if (counter_gps > wait_time){
-    calculate_speads_algorithm.Clatitude1 = calculate_speads_algorithm.Clatitude2;
-    calculate_speads_algorithm.Clongitude1 = calculate_speads_algorithm.Clongitude2;
-    calculate_speads_algorithm.Clatitude2 = msg.latitude;
-    calculate_speads_algorithm.Clongitude2 = msg.longitude;
-
-
-    cout << "lat1: "<< calculate_speads_algorithm.Clatitude1<< " ,lon1: "<< calculate_speads_algorithm.Clongitude1 << endl;
-    cout << "lat2: "<< calculate_speads_algorithm.Clatitude2<< " ,lon2: "<< calculate_speads_algorithm.Clongitude2 << endl;
-    double distance = calculate_speads_algorithm.CoordinatesToMeters(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2 );
-    double velocity = calculate_speads_algorithm.calculate_velocity();
-    double angle = calculate_speads_algorithm.CoordinatesToAngle(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
-    Pm = calculate_speads_algorithm.gpsToCoordinatesInMeter(latitude0 , longitude0 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
-    Vs = calculate_speads_algorithm.calculate_speeds();
-    cout << "distance: " << distance << endl;
-    cout << "velocity: " << velocity << endl;
-    cout << "angle: " << angle << endl;
-    cout << "x,y: " << Pm.x << "," << Pm.y << endl;
-    cout << "u: " << Vs.u << " ,v: " << Vs.v<< " ,r: " << Vs.r << endl;
-    geometry_msgs::Quaternion velocities;
-    velocities.x = Vs.u;
-    velocities.y = Vs.v;
-    velocities.z = Vs.r;
-    velocities.w = velocity;
-    jellyfishbot_control_system.velocities_topic.publish(velocities);
-
+//void RunMyAlgorithm(int counter_gps,const geometry_msgs::Quaternion& msg ){
+void RunMyAlgorithm(){
     jellyfishbot_control_system.x = Pm.x;
     jellyfishbot_control_system.y = Pm.y;
     jellyfishbot_control_system.u = Vs.u;
@@ -260,13 +192,87 @@ void gps_callback(const sensor_msgs::NavSatFix& msg)
     jellyfishbot_control_system.pp_topic.publish(pp_msg);
     jellyfishbot_control_system.vt_topic.publish(vt_msg);
 
+    
+}
+void gps_callback(const sensor_msgs::NavSatFix& msg)
+    {  
+    counter_gps = counter_gps + 1;
+    if (counter_gps < wait_time){
+        cout << "waiting ... time left: "<< wait_time - counter_gps +1 << endl;
     }
+    if (counter_gps == wait_time){ //initial position
+        meterPoints.arr[0][0] = 0;
+        meterPoints.arr[1][0] = 0;
 
+        gpsPoints.arr[0][0] = msg.latitude; 
+        gpsPoints.arr[1][0] =  msg.longitude; 
+
+        gpsPoints.arr[0][1] = 43.213892;
+        gpsPoints.arr[1][1] = 5.536114;
+
+        gpsPoints.arr[0][2] = 43.213923;
+        gpsPoints.arr[1][2] = 5.536211;
+
+        gpsPoints.arr[0][3] = 43.213612;
+        gpsPoints.arr[1][3] = 5.536380;
+
+        gpsPoints.arr[0][4] = 43.213900;
+        gpsPoints.arr[1][4] = 5.536200;
+
+        conversion.Clatitude1 = gpsPoints.arr[0][0];
+        conversion.Clongitude1 = gpsPoints.arr[1][0];
+        for (int i = 1; i < number_points; ++i) {
+            //cout << "i: "<< i<< endl;
+            conversion.Clatitude2 = gpsPoints.arr[0][i]; 
+            conversion.Clongitude2 = gpsPoints.arr[1][i];  
+            pm = conversion.gpsToCoordinatesInMeter(conversion.Clatitude1,conversion.Clongitude1,conversion.Clatitude2,conversion.Clongitude2);
+            meterPoints.arr[0][i] = pm.x;
+            meterPoints.arr[1][i] = pm.y;
+        }
+    }
+    // for (int i = 0; i < 5; i++){
+    // cout <<"x,y: "<<meterPoints.arr[0][i] <<","<<meterPoints.arr[1][i]<<endl;
+    // }
+    
+    if (counter_gps == wait_time){
+        latitude0 = msg.latitude;
+        longitude0 = msg.longitude;
+    }
+    if (counter_gps > wait_time){
+    calculate_speads_algorithm.Clatitude1 = calculate_speads_algorithm.Clatitude2;
+    calculate_speads_algorithm.Clongitude1 = calculate_speads_algorithm.Clongitude2;
+    calculate_speads_algorithm.Clatitude2 = msg.latitude;
+    calculate_speads_algorithm.Clongitude2 = msg.longitude;
+
+
+    cout << "lat1: "<< calculate_speads_algorithm.Clatitude1<< " ,lon1: "<< calculate_speads_algorithm.Clongitude1 << endl;
+    cout << "lat2: "<< calculate_speads_algorithm.Clatitude2<< " ,lon2: "<< calculate_speads_algorithm.Clongitude2 << endl;
+    double distance = calculate_speads_algorithm.CoordinatesToMeters(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2 );
+    double velocity = calculate_speads_algorithm.calculate_velocity();
+    double angle = calculate_speads_algorithm.CoordinatesToAngle(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
+    Pm = calculate_speads_algorithm.gpsToCoordinatesInMeter(latitude0 , longitude0 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
+    Vs = calculate_speads_algorithm.calculate_speeds();
+    cout << "distance: " << distance << endl;
+    cout << "velocity: " << velocity << endl;
+    cout << "angle: " << angle << endl;
+    cout << "x,y: " << Pm.x << "," << Pm.y << endl;
+    cout << "u: " << Vs.u << " ,v: " << Vs.v<< " ,r: " << Vs.r << endl;
+    geometry_msgs::Quaternion velocities;
+    velocities.x = Vs.u;
+    velocities.y = Vs.v;
+    velocities.z = Vs.r;
+    velocities.w = velocity;
+    jellyfishbot_control_system.velocities_topic.publish(velocities);
+
+    
+    RunMyAlgorithm();
+
+
+    }
     }
 
 void imu_callback(const geometry_msgs::Quaternion& msg)
 {    
-    
     hp = hp +1;
     //cout << "Yaw angle: " << endl;
     double xq =  msg.x;
@@ -284,6 +290,9 @@ void imu_callback(const geometry_msgs::Quaternion& msg)
     calculate_speads_algorithm.imuHeading0 = calculate_speads_algorithm.imuHeading;
     calculate_speads_algorithm.imuHeading = EulerAngles.yaw + calculate_speads_algorithm.heading_correction;
     //cout << "Yaw angle: " << jellyfishbot_control_system.psi <<endl;
+    // if (counter_gps > wait_time){
+    //     RunMyAlgorithm();
+    // }
     
 }
     void listener(ros::NodeHandle node,ros::Publisher pub_thrust_l,ros::Publisher pub_thrust_r,ros::Publisher pub_thrust_tt){
@@ -302,18 +311,8 @@ void imu_callback(const geometry_msgs::Quaternion& msg)
 int main(int argc, char **argv)
 {
 
-    
-    
-    // for (int i = 0; i < 5; i++){
-    //     cout <<"x,y: "<<meterPoints.arr[0][i] <<","<<meterPoints.arr[1][i]<<endl;
-    // }
 
-
-
-
-    // Initiate a new ROS node named "listener"
 	ros::init(argc, argv, "main_node");
-	//create a node handle: it is reference assigned to a new node
 	ros::NodeHandle node;
 
     string thL = "/thrust_l";
