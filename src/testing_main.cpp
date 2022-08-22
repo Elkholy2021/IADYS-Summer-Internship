@@ -37,6 +37,7 @@ Point pm;
 Point Pm;
 Speeds Vs;
 
+double delta = 1;
 
 
 int following_point = 1;
@@ -94,7 +95,6 @@ void RunMyAlgorithm(){
     jellyfishbot_control_system.r = Vs.r;
     
     
-    double delta = 1;
     if (following_point == 1){
         ax = 0;
         ay = 0;
@@ -224,17 +224,16 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
         gpsPoints.arr[0][0] = msg.latitude; 
         gpsPoints.arr[1][0] =  msg.longitude; 
 
-        gpsPoints.arr[0][1] = 43.213892;
-        gpsPoints.arr[1][1] = 5.536114;
+        gpsPoints.arr[0][1] = 43.213793;
+        gpsPoints.arr[1][1] =  5.535779;
 
-        gpsPoints.arr[0][2] = 43.213923;
-        gpsPoints.arr[1][2] = 5.536211;
+        gpsPoints.arr[0][2] = 43.213773;
+        gpsPoints.arr[1][2] = 5.535718;
+        gpsPoints.arr[0][3] =43.213558;
+        gpsPoints.arr[1][3] = 5.535843;
 
-        gpsPoints.arr[0][3] = 43.213612;
-        gpsPoints.arr[1][3] = 5.536380;
-
-        gpsPoints.arr[0][4] = 43.213900;
-        gpsPoints.arr[1][4] = 5.536200;
+        gpsPoints.arr[0][4] = 43.213756;
+        gpsPoints.arr[1][4] =  5.535726;
 
 
         

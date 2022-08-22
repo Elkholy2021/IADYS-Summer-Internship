@@ -187,11 +187,11 @@ class control_jellyfishbot {
       int r2 = 3;
       int c2 = 1;
       
-      double f[r1][c1] = {{1,1,0},
+      double f[3][3] = {{1,1,0},
                         {0,0,1},  
                         {0.5*B,-0.5*B,C}};
       
-      double h[r2][c2] = {{tau_x},{tau_y},{tau_N}};
+      double h[3][1] = {{tau_x},{tau_y},{tau_N}};
       ////cout << "dd"<< h[2][0] <<  endl;
       double f_inverse[3][3];
       float determinant = 0;
@@ -338,10 +338,10 @@ class control_jellyfishbot {
               xd = xd + pow(xp - xd,2);
               yd = yd + pow(yp - yd,2);
           }
-      if (xd > xf & xd > xp | xd < xf & xd < xp){
+      if (((xd > xf) && (xd > xp)) || ((xd < xf) && (xd < xp))){
           xd = xf;
       }
-      if (yd > yf & yd > yp | yd < yf & yd < yp){
+      if (((yd > yf) && (yd > yp)) || ((yd < yf) && (yd < yp))){
           yd = yf;
       }
       xdF = xd;
@@ -555,7 +555,7 @@ class control_jellyfishbot {
         cout << "taus required: "<<tau_xV<< " "<< tau_yV<< " "<<tau_NV<< endl;
         thruster_forcesV2(tau_xV,tau_yV,tau_NV,true);
         
-        cout << "taus calculated: "<<tau_L<< " "<< tau_R<< " "<<tau_M<< endl;
+        cout << "taus calculated: "<<tau_R<< " "<< tau_L<< " "<<tau_M<< endl;
         if (tau_R <= 1.1*tau_L &  tau_R >= 0.9*tau_L){
             // MOVE FORWARD
             movement = "FORWARD";
@@ -567,7 +567,9 @@ class control_jellyfishbot {
             //cout << "S1" << endl;
         }
         else{
-            tau_L,tau_R,tau_M = 0,0,0;
+            tau_L = 0;
+            tau_R = 0;
+            tau_M = 0;
             //cout << "S2" << endl;
         }
  
