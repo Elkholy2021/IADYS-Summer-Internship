@@ -486,7 +486,22 @@ class control_jellyfishbot {
         }
   }
 
-        
+  double force_to_pwm(double force){
+      double pwm, p1,p2,p3;
+      if (force <= 0){
+            p1 =       15.76;  
+            p2 =       163.3;  
+            p3 =        1453; 
+            pwm = p1*pow(force,2) + p2*force + p3;
+      }
+      else{
+            p1 =      -10.45;  
+            p2 =       130.4;  
+            p3 =        1548;  
+            pwm = p1*pow(force,2) + p2*force + p3;
+      }
+      return pwm;
+  }      
 
   void obtain__thruster_commands_LOS_Virtual_target(double u_d, double v_d, double xd, double yd){
         

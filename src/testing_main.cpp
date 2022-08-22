@@ -165,7 +165,11 @@ void RunMyAlgorithm(){
     tau_L = jellyfishbot_control_system.tau_L;
     tau_R = jellyfishbot_control_system.tau_R;
     tau_M = jellyfishbot_control_system.tau_M;
-    
+
+    tau_L = jellyfishbot_control_system.force_to_pwm(tau_L);
+    tau_R = jellyfishbot_control_system.force_to_pwm(tau_R);
+    tau_M = jellyfishbot_control_system.force_to_pwm(tau_M);
+
     if (jellyfishbot_control_system.distance < 0.5 && following_point == number_points-1 && counter > 100 && jellyfishbot_control_system.stop == false){
         jellyfishbot_control_system.stop = true;
         
@@ -173,9 +177,9 @@ void RunMyAlgorithm(){
     }
     if (jellyfishbot_control_system.stop == true) {
         cout <<"heeey I reached the final point" <<endl;
-        tau_L = 0;
-        tau_R = 0;
-        tau_M = 0;
+        tau_L = 1453; //0;
+        tau_R = 1453; //0;
+        tau_M = 1453; //0;
     }
         
     
