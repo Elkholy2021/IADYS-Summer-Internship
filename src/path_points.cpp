@@ -3,24 +3,11 @@
 #include <cmath>
 #include <vector>
 #include <utility>
-#include "ros/ros.h"
 
 using namespace std;
 
-struct Point
-        {
-        double x;
-        double y;
-        double z;
-        };
-struct Speeds
-        {
-        double u;
-        double v;
-        double r;
-        }; 
 
-class calculate_speads{
+class convert_gps_to_meter{
     public:
 
         double distance = 0;
@@ -131,38 +118,49 @@ class calculate_speads{
         return velocity;
 
     }
-    Speeds calculate_speeds(){
-
-        Speeds Vs;
-        Vs.u = velocity*cos(imuHeading-gpsHeading);
-        Vs.v = velocity*sin(imuHeading-gpsHeading);
-        Vs.r = (imuHeading - imuHeading0)/0.2; //imu freq is 5hz
-        cout << "imuHeading0: "<<imuHeading0 << ", imuHeading: " << imuHeading <<endl;
-        return Vs;
-
-
-    }
+    
 };
 
-// calculate_speads calculate_speads_algorithm;
+// convert_gps_to_meter conversion;
 // int main(){
 
 
-// calculate_speads_algorithm.latitude1 = 43.213552;
-// calculate_speads_algorithm.longitude1 = 5.536321;
-// calculate_speads_algorithm. latitude2 = 43.213086 ;//43.213897;
-// calculate_speads_algorithm.longitude2 = 5.536408; //5.536085;
-// calculate_speads_algorithm.timeStamp = 18.5782;
-// calculate_speads_algorithm.imuHeading = 2.957;
 
-// double distance = calculate_speads_algorithm.CoordinatesToMeters();
-// double velocity = calculate_speads_algorithm.calculate_velocity();
-// double angle = calculate_speads_algorithm.CoordinatesToAngle();
-// Speeds Vs = calculate_speads_algorithm.calculate_speeds();
-// cout << "distance: " << distance << endl;
-// cout << "velocity: " << velocity << endl;
-// cout << "angle: " << angle << endl;
-// cout << "u: " << Vs.u << " ,v: " << Vs.v<< " ,r: " << Vs.r << endl;
+// demo gpsPoints;
+// demo meterPoints;
+// meterPoints.arr[0][0] = 0;
+// meterPoints.arr[1][0] = 0;
+
+// gpsPoints.arr[0][0] = 43.21355;
+// gpsPoints.arr[1][0] =  5.536307;
+
+// gpsPoints.arr[0][1] = 43.213892;
+// gpsPoints.arr[1][1] = 5.536114;
+
+// gpsPoints.arr[0][2] = 43.213923;
+// gpsPoints.arr[1][2] = 5.536211;
+
+// gpsPoints.arr[0][3] = 43.213612;
+// gpsPoints.arr[1][3] = 5.536380;
+
+// gpsPoints.arr[0][4] = 43.213900;
+// gpsPoints.arr[1][4] = 5.536200;
+
+// conversion.Clatitude1 = gpsPoints.arr[0][0];
+// conversion.Clongitude1 = gpsPoints.arr[1][0];
+// for (int i = 1; i < 5; ++i) {
+//     //cout << "i: "<< i<< endl;
+//     conversion.Clatitude2 = gpsPoints.arr[0][i]; 
+//     conversion.Clongitude2 = gpsPoints.arr[1][i];  
+//     Point pm = conversion.gpsToCoordinatesInMeter(conversion.Clatitude1,conversion.Clongitude1,conversion.Clatitude2,conversion.Clongitude2);
+//     meterPoints.arr[0][i] = pm.x;
+//     meterPoints.arr[1][i] = pm.y;
+// }
+// for (int i = 0; i < 5; i++){
+//     cout <<"x,y: "<<meterPoints.arr[0][i] <<","<<meterPoints.arr[1][i]<<endl;
+// }
+
+
 
 
 // }
