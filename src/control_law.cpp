@@ -17,8 +17,8 @@ class control_jellyfishbot {
   public:
       double m= 18; //kg
       double Iz= 2.37; //inertia around z
-      double dt=0.1; //time interval in seconds, depending on the frequency of the sensor readings
-      
+      double dt=1; //time interval in seconds, depending on the frequency of the sensor readings
+                    // and it is 1 because I run my algorithm inside the gpsCallback, freq = 1hz      
       double t_final=10;
       double B = 0.538; //distance between the left and the right thrusters
       double C = 0; //ditance between middle thruster and center of gravity
@@ -43,6 +43,8 @@ class control_jellyfishbot {
       ros::Publisher pp_topic;
       ros::Publisher vt_topic;
       ros::Publisher velocities_topic;
+      ros::Publisher thrusters_forces_topic;
+      ros::Publisher thrusters_rpm_topic;
 
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration
@@ -91,6 +93,7 @@ class control_jellyfishbot {
       double distance0 = 10000;
       int sign = 1;
       int clip_counter = 0;
+      int counter_thruster = 0;
       int counter = 0;
       string movement;
       double x = 0;
@@ -140,7 +143,7 @@ class control_jellyfishbot {
       double u_d_ref = fmin( u_d_yaw+(u_d- u_d_yaw)*exp(-5.73-abs(e_psi)),u_d);
       double u_d_dot = u_dot_max*tanh( k_u_amax*(u_d_ref-u)/ u_dot_max);
       double e_u = u - u_d;
-      double eta_U = u_d_dot- kp_u*e_u;
+      double eta_U = u_d_dot- kp_u*abs(e_u); //ADDED abs //TOFIX
     //   if (eta_u < 0){
     //       eta_u = 0;
     //   }
@@ -222,21 +225,26 @@ class control_jellyfishbot {
       tau_L = taus[0][0];
       tau_R = taus[1][0];
       tau_M = taus[2][0];
+      counter_thruster = counter_thruster +1;
       if (clipping == true){
+        
         double tau_max = fmax(fmax(tau_L,tau_R),tau_M);
         double tau_min = fmin(fmin(tau_L,tau_R),tau_M);
-        if (tau_max > abs(tau_min) & tau_max > 30){
+        if (tau_max > abs(tau_min) && tau_max > 30){
             tau_L =  (tau_L/tau_max)*30;
             tau_R =  (tau_R/tau_max)*30;
             tau_M =  (tau_M/tau_max)*30;
+            clip_counter = clip_counter +1;
         }
-        if (tau_max < abs(tau_min) & tau_min < -30){
+        if (tau_max < abs(tau_min) && tau_min < -30){
             tau_L =  (tau_L/abs(tau_min))*30;
             tau_R =  (tau_R/abs(tau_min))*30;
             tau_M =  (tau_M/abs(tau_min))*30;
+            clip_counter = clip_counter +1;
             }
 
       }
+      cout << "clipping counter: "<< clip_counter<<"/"<<counter_thruster << endl;
       
   }
 
@@ -488,6 +496,7 @@ class control_jellyfishbot {
 
   double force_to_pwm(double force){
       double pwm, p1,p2,p3;
+      force = force/9.80665;
       if (force <= 0){
             p1 =       15.76;  
             p2 =       163.3;  
@@ -592,6 +601,103 @@ class control_jellyfishbot {
 
 
   }
+void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v_d, double xd, double yd){
+    double tau_xV , tau_yV , tau_NV;
+    double Xp = atan2(yd-y,xd-x);
+    //Xp = math.atan2(self.yd-self.yp,self.xd-self.xp)
+    cout <<"x,y: "<< x<<","<<y<<" xd,yd: "<< xd <<","<<yd<<endl; 
+    cout <<"xp,yp: "<< xp<<","<<yp <<endl; 
+    double e = -(x-xd)*sin(Xp)+(y-yd)*cos(Xp);
+    //e = -(self.x-self.xp)*math.sin(Xp)+(self.y-self.yp)*math.cos(Xp)
+
+
+    e_integral =  e_integral + e*dt;
+    double Xr = atan(-K_P*e-K_I*e_integral);
+    
+    double psi_d = Xp + Xr; // - atan(self.v/u_d)
+    cout<< "Xp: "<< Xp<< " ,Xr: "<< Xr<< endl;
+    cout<< "psi_d before: "<< psi_d<< endl;
+    cout << "psi before: "<<psi << endl;
+    if (psi_d < -0.5*M_PI  | psi < -0.5*M_PI  | psi_d > 0.5*M_PI  | psi > 0.5*M_PI ){
+        if (psi_d < 0){
+            psi_d = psi_d +2*M_PI;
+        }
+            
+        
+        if (psi < 0){
+            psi = psi + 2*M_PI; 
+        }
+    }
+
+    //cout << "psi_d: "<< psi_d<< endl; 
+    //cout << "FFF psi_d: " << psi_d << endl; 
+    double e_psi_candidate = psi_d - psi;
+    cout << "psi: "<< psi<< " ,psi_d: "<< psi_d << endl;
+    cout << "e_psi_candidate before: "<< e_psi_candidate << endl;
+    if (e_psi_candidate > M_PI){
+        e_psi_candidate = e_psi_candidate -M_PI;
+    }
+    else if (e_psi_candidate < -M_PI){
+        e_psi_candidate = e_psi_candidate + M_PI;
+    }
+    e_psi = e_psi_candidate;
+    //cout << "FFF e_psi: " << e_psi << " yaw: "<< psi << endl; 
+
+
+    
+    if (e_psi >= 0){
+        //MOVE RIGHT
+        movement = "RIGHT";
+    }
+    else if (e_psi < 0){
+        //MOVE LEFT
+        movement = "LEFT";
+    }
+    if ((e_psi <= 0.1) && ( e_psi >= -0.1)){
+        // GO FORWARD
+        tau_xV = 6;
+        tau_yV = 0;
+        tau_NV = 0;
+        //tau_NV = 0.1*exp(e_psi-0.1);
+    }
+    else {
+        // GO RIGHT or LEFT
+        tau_xV = 0;
+        tau_yV = 0;
+        tau_NV = (7/3.14)*e_psi;
+        //tau_NV = 5*exp(e_psi-3.14);
+    }
+    
+    
+   
+    cout << "taus required: "<<tau_xV<< " "<< tau_yV<< " "<<tau_NV<< endl;
+    thruster_forcesV2(tau_xV,tau_yV,tau_NV,true);
+    double h = tau_L;
+    tau_L = tau_R;
+    tau_R = h;
+    cout << "taus calculated: "<<tau_R<< " "<< tau_L<< " "<<tau_M<< endl;
+    if (tau_R <= 1.1*tau_L &  tau_R >= 0.9*tau_L){
+        // MOVE FORWARD
+        movement = "FORWARD";
+    }
+    cout << "MOVING  " << movement <<endl;
+    if (stop != true){
+        //tau_L,tau_R,tau_M = round(tau_L,1) ,round(tau_R,1) ,round(tau_M,1);
+        double haha = 555;
+        //cout << "S1" << endl;
+    }
+    else{
+        tau_L = 0;
+        tau_R = 0;
+        tau_M = 0;
+        //cout << "S2" << endl;
+    }
+
+    //return tau_L,tau_R,tau_M
+
+
+    }
+
 
 
 

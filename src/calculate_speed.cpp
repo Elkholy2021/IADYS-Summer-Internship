@@ -34,7 +34,6 @@ class calculate_speads{
         double Clongitude2 = 0;
         double imuHeading;
         double imuHeading0 ;
-        double gpsHeading = 0;
         double heading_correction;
         // double latitudeR1;
         // double longitudeR1;
@@ -95,7 +94,7 @@ class calculate_speads{
 
         const auto degree = radianToDegree(atan2(y, x));
         //return (degree >= 0) ? degree : (degree + 360);
-        gpsHeading = degreeToRadian(degree);
+        double gpsHeading = degreeToRadian(degree);
         return gpsHeading;
     }
 
@@ -131,12 +130,13 @@ class calculate_speads{
         return velocity;
 
     }
-    Speeds calculate_speeds(){
+    Speeds calculate_speeds(double angle){
 
         Speeds Vs;
-        Vs.u = velocity*cos(imuHeading-gpsHeading);
-        Vs.v = velocity*sin(imuHeading-gpsHeading);
-        Vs.r = (imuHeading - imuHeading0)/0.2; //imu freq is 5hz
+        Vs.u = velocity*cos(imuHeading-angle);
+        Vs.v = velocity*sin(imuHeading-angle);
+        Vs.r = (imuHeading - imuHeading0)/1; //gps freq is 1hz
+        cout << "gpsHeading: "<<angle<<endl;
         cout << "imuHeading0: "<<imuHeading0 << ", imuHeading: " << imuHeading <<endl;
         return Vs;
 

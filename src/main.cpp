@@ -251,7 +251,7 @@ void gps_callback(const sensor_msgs::NavSatFix& msg)
     double velocity = calculate_speads_algorithm.calculate_velocity();
     double angle = calculate_speads_algorithm.CoordinatesToAngle(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
     Pm = calculate_speads_algorithm.gpsToCoordinatesInMeter(latitude0 , longitude0 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
-    Vs = calculate_speads_algorithm.calculate_speeds();
+    Vs = calculate_speads_algorithm.calculate_speeds(angle);
     cout << "distance: " << distance << endl;
     cout << "velocity: " << velocity << endl;
     cout << "angle: " << angle << endl;

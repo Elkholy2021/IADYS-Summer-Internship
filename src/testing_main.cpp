@@ -16,6 +16,7 @@ ros::Time cmdDefined;
 convert_gps_to_meter conversion;
 control_jellyfishbot jellyfishbot_control_system;
 calculate_speads calculate_speads_algorithm;
+bool ROS_INFO_FLAG = false;
 struct Quaternion {
     double w, x, y, z;
     };
@@ -157,18 +158,29 @@ void RunMyAlgorithm(){
     jellyfishbot_control_system.yd = yd;
     jellyfishbot_control_system.u_d = u_d;
     jellyfishbot_control_system.v_d = v_d;
-    //cout << "u_d: " <<jellyfishbot_control_system.u_d << ",u: " <<jellyfishbot_control_system.u << endl;
     
-    // if (! jellyfishbot_control_system.check_arrival(threshold) | 1 <2){
-    //     //cout << "P4 " << endl;
-    jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
+    
+    //jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
+    jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
+
     tau_L = jellyfishbot_control_system.tau_L;
     tau_R = jellyfishbot_control_system.tau_R;
     tau_M = jellyfishbot_control_system.tau_M;
-
+    geometry_msgs::Vector3 thrusters_forces_msg;
+    thrusters_forces_msg.x = tau_L;
+    thrusters_forces_msg.y = tau_R;
+    thrusters_forces_msg.z = tau_M;
+    jellyfishbot_control_system.thrusters_forces_topic.publish(thrusters_forces_msg);
+    
+    
     tau_L = jellyfishbot_control_system.force_to_pwm(tau_L);
     tau_R = jellyfishbot_control_system.force_to_pwm(tau_R);
     tau_M = jellyfishbot_control_system.force_to_pwm(tau_M);
+    geometry_msgs::Vector3 thrusters_rpm_msg;
+    thrusters_rpm_msg.x = tau_L;
+    thrusters_rpm_msg.y = tau_R;
+    thrusters_rpm_msg.z = tau_M;
+    jellyfishbot_control_system.thrusters_rpm_topic.publish(thrusters_rpm_msg);
 
     if (jellyfishbot_control_system.distance < 0.5 && following_point == number_points-1 && counter > 100 && jellyfishbot_control_system.stop == false){
         jellyfishbot_control_system.stop = true;
@@ -216,7 +228,9 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
 {
     //TODO
     // setThrustCmd(1, 1, 0);
-    ROS_INFO("odomGPSCallback");
+    if (ROS_INFO_FLAG){
+        ROS_INFO("odomGPSCallback");
+    }
     counter_gps = counter_gps + 1;
     if (counter_gps < wait_time){
         cout << "waiting ... time left: "<< wait_time - counter_gps +1 << endl;
@@ -267,6 +281,8 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
     calculate_speads_algorithm.Clatitude2 = msg.latitude;
     calculate_speads_algorithm.Clongitude2 = msg.longitude;
 
+    cout << "Yaw angle: " << jellyfishbot_control_system.psi <<endl;
+    cout << "Correction: " << calculate_speads_algorithm.heading_correction <<endl;
 
     cout << "lat1: "<< calculate_speads_algorithm.Clatitude1<< " ,lon1: "<< calculate_speads_algorithm.Clongitude1 << endl;
     cout << "lat2: "<< calculate_speads_algorithm.Clatitude2<< " ,lon2: "<< calculate_speads_algorithm.Clongitude2 << endl;
@@ -274,7 +290,7 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
     double velocity = calculate_speads_algorithm.calculate_velocity();
     double angle = calculate_speads_algorithm.CoordinatesToAngle(calculate_speads_algorithm.Clatitude1 , calculate_speads_algorithm.Clongitude1 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
     Pm = calculate_speads_algorithm.gpsToCoordinatesInMeter(latitude0 , longitude0 , calculate_speads_algorithm.Clatitude2 , calculate_speads_algorithm.Clongitude2);
-    Vs = calculate_speads_algorithm.calculate_speeds();
+    Vs = calculate_speads_algorithm.calculate_speeds(angle);
     cout << "distance: " << distance << endl;
     cout << "velocity: " << velocity << endl;
     cout << "angle: " << angle << endl;
@@ -297,7 +313,9 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
 void magHeadingCallback(const geometry_msgs::Quaternion &msg)
 {
     //TODO
-    ROS_INFO("magHeadingCallback");
+    if (ROS_INFO_FLAG){
+        ROS_INFO("magHeadingCallback");
+    }
     hp = hp +1;
     //cout << "Yaw angle: " << endl;
     double xq =  msg.x;
@@ -311,10 +329,13 @@ void magHeadingCallback(const geometry_msgs::Quaternion &msg)
     q.z = zq;
     q.w = wq;
     EulerAngles = ToEulerAngles(q);
-    jellyfishbot_control_system.psi = EulerAngles.yaw;
     calculate_speads_algorithm.imuHeading0 = calculate_speads_algorithm.imuHeading;
     calculate_speads_algorithm.imuHeading = EulerAngles.yaw + calculate_speads_algorithm.heading_correction;
+    //jellyfishbot_control_system.psi = EulerAngles.yaw;
+    jellyfishbot_control_system.psi = calculate_speads_algorithm.imuHeading;
+
     //cout << "Yaw angle: " << jellyfishbot_control_system.psi <<endl;
+
     // if (counter_gps > wait_time){
     //     RunMyAlgorithm();
     // }
@@ -323,7 +344,10 @@ void magHeadingCallback(const geometry_msgs::Quaternion &msg)
 void headingCorrectionCallback(const std_msgs::Float32 &msg)
 {
     //TODO
-    ROS_INFO("headingCorrectionCallback");
+    if (ROS_INFO_FLAG){
+
+        ROS_INFO("headingCorrectionCallback");
+    }
     calculate_speads_algorithm.heading_correction = calculate_speads_algorithm.degreeToRadian(msg.data);
 
 }
@@ -368,6 +392,8 @@ int main(int argc, char **argv) {
     ros::Publisher pp_topic = n.advertise<geometry_msgs::Vector3>("/projected_point_topic", 1000);
     ros::Publisher vt_topic = n.advertise<geometry_msgs::Vector3>("/virtual_target_topic", 1000);
     ros::Publisher velocities_topic = n.advertise<geometry_msgs::Quaternion >("/velocities", 1000);
+    ros::Publisher thrusters_forces_topic = n.advertise<geometry_msgs::Vector3 >("/thrusters_forces", 1000);
+    ros::Publisher thrusters_rpm_topic = n.advertise<geometry_msgs::Vector3 >("/thrusters_rpm", 1000);
 
     // jellyfishbot_control_system.pub_thrust_l = thrust_l_pub;
     // jellyfishbot_control_system.pub_thrust_r = thrust_r_pub;
@@ -375,7 +401,8 @@ int main(int argc, char **argv) {
     jellyfishbot_control_system.pp_topic = pp_topic;
     jellyfishbot_control_system.vt_topic = vt_topic;
     jellyfishbot_control_system.velocities_topic = velocities_topic;
-
+    jellyfishbot_control_system.thrusters_forces_topic = thrusters_forces_topic; 
+    jellyfishbot_control_system.thrusters_rpm_topic = thrusters_rpm_topic;
 
     thrust_l.data = 0;
     thrust_r.data = 0;
@@ -395,9 +422,9 @@ int main(int argc, char **argv) {
         thrust_l_pub.publish(thrust_l);
         thrust_r_pub.publish(thrust_r);
         thrust_t_pub.publish(thrust_t);
-
-        ROS_INFO("Loop !!");
-
+        if (ROS_INFO_FLAG){
+            ROS_INFO("Loop !!");
+        }
         ros::spinOnce();
         loop_rate.sleep();
     }

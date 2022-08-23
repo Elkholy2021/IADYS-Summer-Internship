@@ -92,6 +92,8 @@ int xf_0;
 bool change_point = false;
 void pose_callback(const geometry_msgs::Pose& msg)
 {    
+    jellyfishbot_control_system.dt = 0.1;
+
     hp = hp +1;
     double threshold = 0.5;
 
@@ -116,7 +118,7 @@ void pose_callback(const geometry_msgs::Pose& msg)
     // ROS_INFO("[Listener] I heard poseYaw: [%f]\n",yaw);
     //cout << "I got here: "<< h << endl; 
         double ax, ay, xf, yf;
-        double delta = 1;
+        double delta = 3;
         if (following_point == 1){
             ax = 0;
             ay = 0;
@@ -290,7 +292,9 @@ void pose_callback(const geometry_msgs::Pose& msg)
         
         if (! jellyfishbot_control_system.check_arrival(threshold) | 1 <2){
             //cout << "P4 " << endl;
-            jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
+            //jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
+            jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
+
             tau_L = jellyfishbot_control_system.tau_L;
             tau_R = jellyfishbot_control_system.tau_R;
             tau_M = jellyfishbot_control_system.tau_M;
