@@ -45,7 +45,10 @@ class control_jellyfishbot {
       ros::Publisher velocities_topic;
       ros::Publisher thrusters_forces_topic;
       ros::Publisher thrusters_rpm_topic;
-
+      ros::Publisher distance_to_target_topic;
+      ros::Publisher path_segment_topic;
+      ros::Publisher headings_topic;
+    
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration
       double u_d_yaw = 5; // desired surge velocity for periods of yaw motion
@@ -56,6 +59,7 @@ class control_jellyfishbot {
 
       double e_psi0 = 0;
       double e_psi = 0;
+      double Psi_d = 0;
 
       double e_integral = 0;
       double K_P = 1;
@@ -71,7 +75,7 @@ class control_jellyfishbot {
       double yf = 10000;
       double xf0 = 0;
       double yf0 = 0;
-      double distance = 1000;
+      double distance = 10000;
       bool enable_print = true;
 
       double xd = 9999;
@@ -539,7 +543,7 @@ class control_jellyfishbot {
               psi = psi + 2*M_PI; 
             }
         }
-
+        Psi_d = psi_d;
         //cout << "psi_d: "<< psi_d<< endl; 
         //cout << "FFF psi_d: " << psi_d << endl; 
         double e_psi_candidate = psi_d - psi;
@@ -628,7 +632,7 @@ void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v
             psi = psi + 2*M_PI; 
         }
     }
-
+    Psi_d = psi_d;
     //cout << "psi_d: "<< psi_d<< endl; 
     //cout << "FFF psi_d: " << psi_d << endl; 
     double e_psi_candidate = psi_d - psi;

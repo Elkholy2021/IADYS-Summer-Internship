@@ -146,7 +146,9 @@ void RunMyAlgorithm(){
 
     //cout << "Counter: " << counter << endl;
     cout << "following_point: "<< following_point<<endl;
-    if (jellyfishbot_control_system.distance < threshold && counter > 100 ){
+    bool check_arrival = jellyfishbot_control_system.check_arrival(threshold);
+
+    if (jellyfishbot_control_system.distance < threshold && counter > 10 ){
         following_point = following_point + 1;
         counter = 0;
         change_point = true;
@@ -305,6 +307,25 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
 
     
     RunMyAlgorithm();
+    geometry_msgs::Vector3 distance_to_target_msg;
+    distance_to_target_msg.x = jellyfishbot_control_system.distance;
+    distance_to_target_msg.y = latitude0;
+    distance_to_target_msg.z = longitude0;
+    jellyfishbot_control_system.distance_to_target_topic.publish(distance_to_target_msg);
+
+    geometry_msgs::Quaternion path_segment_msg;
+    path_segment_msg.x = jellyfishbot_control_system.ax;
+    path_segment_msg.y = jellyfishbot_control_system.ay;
+    path_segment_msg.z = jellyfishbot_control_system.xf;
+    path_segment_msg.w = jellyfishbot_control_system.yf;
+    jellyfishbot_control_system.path_segment_topic.publish(path_segment_msg);
+
+    geometry_msgs::Quaternion headings_msg;
+    headings_msg.x = jellyfishbot_control_system.psi;
+    headings_msg.y = jellyfishbot_control_system.Psi_d;
+    headings_msg.z = jellyfishbot_control_system.e_psi;
+    headings_msg.w = angle;
+    jellyfishbot_control_system.headings_topic.publish(headings_msg);
 
 
     }
@@ -394,6 +415,9 @@ int main(int argc, char **argv) {
     ros::Publisher velocities_topic = n.advertise<geometry_msgs::Quaternion >("/velocities", 1000);
     ros::Publisher thrusters_forces_topic = n.advertise<geometry_msgs::Vector3 >("/thrusters_forces", 1000);
     ros::Publisher thrusters_rpm_topic = n.advertise<geometry_msgs::Vector3 >("/thrusters_rpm", 1000);
+    ros::Publisher distance_to_target_topic = n.advertise<geometry_msgs::Vector3 >("/distance_to_target", 1000);
+    ros::Publisher path_segment_topic = n.advertise<geometry_msgs::Quaternion >("/path_segment_topic", 1000);
+    ros::Publisher headings_topic = n.advertise<geometry_msgs::Quaternion >("/headings_topic", 1000);
 
     // jellyfishbot_control_system.pub_thrust_l = thrust_l_pub;
     // jellyfishbot_control_system.pub_thrust_r = thrust_r_pub;
@@ -403,7 +427,9 @@ int main(int argc, char **argv) {
     jellyfishbot_control_system.velocities_topic = velocities_topic;
     jellyfishbot_control_system.thrusters_forces_topic = thrusters_forces_topic; 
     jellyfishbot_control_system.thrusters_rpm_topic = thrusters_rpm_topic;
-
+    jellyfishbot_control_system.distance_to_target_topic = distance_to_target_topic;
+    jellyfishbot_control_system.path_segment_topic = path_segment_topic;
+    jellyfishbot_control_system.headings_topic = headings_topic;
     thrust_l.data = 0;
     thrust_r.data = 0;
     thrust_t.data = 0;
