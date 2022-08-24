@@ -38,7 +38,7 @@ Point pm;
 Point Pm;
 Speeds Vs;
 
-double delta = 1;
+double delta = 3;
 
 
 int following_point = 1;
@@ -78,7 +78,9 @@ EulerAngles ToEulerAngles(Quaternion q) {
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
     angles.yaw = std::atan2(siny_cosp, cosy_cosp);
-
+    // geometry_msgs::Vector3 yaw_msg;
+    // yaw_msg.x = angles.yaw;
+    // jellyfishbot_control_system.yaw_topic.publish(yaw_msg);
     return angles;
     }
 void setThrustCmd(float left, float right, float trans) {
@@ -99,14 +101,14 @@ void RunMyAlgorithm(){
     if (following_point == 1){
         ax = 0;
         ay = 0;
-        yf = meterPoints.arr[0][1];
-        xf = meterPoints.arr[1][1];
+        yf = meterPoints.arr[1][1];
+        xf = meterPoints.arr[0][1];
     }
     else{
         ax = meterPoints.arr[0][following_point-1];
         ay = meterPoints.arr[1][following_point-1];
-        yf = meterPoints.arr[0][following_point];
-        xf = meterPoints.arr[1][following_point];
+        yf = meterPoints.arr[1][following_point];
+        xf = meterPoints.arr[0][following_point];
     }
     
     cout << "ax,ay: "<< ax <<","<< ay << endl;
@@ -241,12 +243,28 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
         meterPoints.arr[0][0] = 0;
         meterPoints.arr[1][0] = 0;
 
-        gpsPoints.arr[0][0] = msg.latitude; 
-        gpsPoints.arr[1][0] =  msg.longitude; 
+        // gpsPoints.arr[0][0] = msg.latitude; 
+        // gpsPoints.arr[1][0] =  msg.longitude; 
+        
+        gpsPoints.arr[0][0] =  43.251740;  //IADYS
+        gpsPoints.arr[1][0] =  5.580680; 
 
-        gpsPoints.arr[0][1] = 43.213793;
-        gpsPoints.arr[1][1] =  5.535779;
+        // gpsPoints.arr[0][1] = 43.252561;  //en face building with glasses
+        // gpsPoints.arr[1][1] =  5.581275; 
+        // gpsPoints.arr[0][1] = 43.252015;  //corner north west building accros street
+        // gpsPoints.arr[1][1] =  5.580286; 
+        // gpsPoints.arr[0][1] = 43.251811;  //west
+        // gpsPoints.arr[1][1] =  5.579929; 
+        // gpsPoints.arr[0][1] = 43.251801;  //north east corner of our building
+        // gpsPoints.arr[1][1] =  5.580985;
+        // gpsPoints.arr[0][1] = 43.251705;  //south east corner of our building
+        // gpsPoints.arr[1][1] = 5.580987;
+        gpsPoints.arr[0][1] = 43.251739;  //south wast corner of our building
+        gpsPoints.arr[1][1] = 5.580427;
 
+
+        // gpsPoints.arr[0][1] = 43.213793;
+        // gpsPoints.arr[1][1] =  5.535779;
         gpsPoints.arr[0][2] = 43.213773;
         gpsPoints.arr[1][2] = 5.535718;
         gpsPoints.arr[0][3] =43.213558;
@@ -255,16 +273,18 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
         gpsPoints.arr[0][4] = 43.213756;
         gpsPoints.arr[1][4] =  5.535726;
 
-
-        
-
         conversion.Clatitude1 = gpsPoints.arr[0][0];
         conversion.Clongitude1 = gpsPoints.arr[1][0];
+        latitude0 = 43.251740; //IADYS
+        longitude0 = 5.580680;
         for (int i = 1; i < number_points; ++i) {
+        // for (int i = 0; i < number_points; ++i) {
             //cout << "i: "<< i<< endl;
             conversion.Clatitude2 = gpsPoints.arr[0][i]; 
             conversion.Clongitude2 = gpsPoints.arr[1][i];  
-            pm = conversion.gpsToCoordinatesInMeter(conversion.Clatitude1,conversion.Clongitude1,conversion.Clatitude2,conversion.Clongitude2);
+            //pm = conversion.gpsToCoordinatesInMeter(conversion.Clatitude1,conversion.Clongitude1,conversion.Clatitude2,conversion.Clongitude2);
+            pm = conversion.gpsToCoordinatesInMeter(latitude0,longitude0,conversion.Clatitude2,conversion.Clongitude2);
+
             meterPoints.arr[0][i] = pm.x;
             meterPoints.arr[1][i] = pm.y;
         }
@@ -274,14 +294,21 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
     // }
     
     if (counter_gps == wait_time){
-        latitude0 = msg.latitude;
-        longitude0 = msg.longitude;
+        // latitude0 = msg.latitude;
+        // longitude0 = msg.longitude;
+        latitude0 = 43.251740; //IADYS
+        longitude0 = 5.580680;
     }
     if (counter_gps > wait_time){
-    calculate_speads_algorithm.Clatitude1 = calculate_speads_algorithm.Clatitude2;
-    calculate_speads_algorithm.Clongitude1 = calculate_speads_algorithm.Clongitude2;
-    calculate_speads_algorithm.Clatitude2 = msg.latitude;
-    calculate_speads_algorithm.Clongitude2 = msg.longitude;
+    // calculate_speads_algorithm.Clatitude1 = calculate_speads_algorithm.Clatitude2;
+    // calculate_speads_algorithm.Clongitude1 = calculate_speads_algorithm.Clongitude2;
+    // calculate_speads_algorithm.Clatitude2 = msg.latitude;
+    // calculate_speads_algorithm.Clongitude2 = msg.longitude;
+    calculate_speads_algorithm.Clatitude1 = 43.251740; //IADYS
+    calculate_speads_algorithm.Clongitude1 = 5.580680;
+    calculate_speads_algorithm.Clatitude2 = 43.251740;
+    calculate_speads_algorithm.Clongitude2 = 5.580680;
+
 
     cout << "Yaw angle: " << jellyfishbot_control_system.psi <<endl;
     cout << "Correction: " << calculate_speads_algorithm.heading_correction <<endl;
@@ -351,9 +378,14 @@ void magHeadingCallback(const geometry_msgs::Quaternion &msg)
     q.w = wq;
     EulerAngles = ToEulerAngles(q);
     calculate_speads_algorithm.imuHeading0 = calculate_speads_algorithm.imuHeading;
-    calculate_speads_algorithm.imuHeading = EulerAngles.yaw + calculate_speads_algorithm.heading_correction;
+    //calculate_speads_algorithm.imuHeading = EulerAngles.yaw + calculate_speads_algorithm.heading_correction;
+    calculate_speads_algorithm.imuHeading = calculate_speads_algorithm.degreeToRadian(msg.z-90) + calculate_speads_algorithm.heading_correction;
+    
     //jellyfishbot_control_system.psi = EulerAngles.yaw;
     jellyfishbot_control_system.psi = calculate_speads_algorithm.imuHeading;
+    geometry_msgs::Vector3 yaw_msg;
+    yaw_msg.x = calculate_speads_algorithm.degreeToRadian(msg.z-90);
+    jellyfishbot_control_system.yaw_topic.publish(yaw_msg);
 
     //cout << "Yaw angle: " << jellyfishbot_control_system.psi <<endl;
 
@@ -407,9 +439,9 @@ int main(int argc, char **argv) {
     //ros::Subscriber thrust_l_sub = n.subscribe("thrustCmd", 1, thrustCmdCallback); // subscribing on thrusturs commands
 
     //Pubs
-    ros::Publisher thrust_l_pub = n.advertise<std_msgs::Float32>("thrust_l", 1);  // publishing on "thrust_l" topic : left thruster command
-    ros::Publisher thrust_r_pub = n.advertise<std_msgs::Float32>("thrust_r", 1);  // publishing on "thrust_r" topic : right thruster command
-    ros::Publisher thrust_t_pub = n.advertise<std_msgs::Float32>("thrust_t", 1);  // publishing on "thrust_t" topic : central thruster command
+    ros::Publisher thrust_l_pub = n.advertise<std_msgs::Float32>("thrust_l0", 1);  // publishing on "thrust_l" topic : left thruster command
+    ros::Publisher thrust_r_pub = n.advertise<std_msgs::Float32>("thrust_r0", 1);  // publishing on "thrust_r" topic : right thruster command
+    ros::Publisher thrust_t_pub = n.advertise<std_msgs::Float32>("thrust_t0", 1);  // publishing on "thrust_t" topic : central thruster command
     ros::Publisher pp_topic = n.advertise<geometry_msgs::Vector3>("/projected_point_topic", 1000);
     ros::Publisher vt_topic = n.advertise<geometry_msgs::Vector3>("/virtual_target_topic", 1000);
     ros::Publisher velocities_topic = n.advertise<geometry_msgs::Quaternion >("/velocities", 1000);
@@ -418,6 +450,9 @@ int main(int argc, char **argv) {
     ros::Publisher distance_to_target_topic = n.advertise<geometry_msgs::Vector3 >("/distance_to_target", 1000);
     ros::Publisher path_segment_topic = n.advertise<geometry_msgs::Quaternion >("/path_segment_topic", 1000);
     ros::Publisher headings_topic = n.advertise<geometry_msgs::Quaternion >("/headings_topic", 1000);
+    ros::Publisher yaw_topic = n.advertise<geometry_msgs::Vector3 >("/yaw_topic", 1000);
+
+    
 
     // jellyfishbot_control_system.pub_thrust_l = thrust_l_pub;
     // jellyfishbot_control_system.pub_thrust_r = thrust_r_pub;
@@ -430,6 +465,7 @@ int main(int argc, char **argv) {
     jellyfishbot_control_system.distance_to_target_topic = distance_to_target_topic;
     jellyfishbot_control_system.path_segment_topic = path_segment_topic;
     jellyfishbot_control_system.headings_topic = headings_topic;
+    jellyfishbot_control_system.yaw_topic = yaw_topic;
     thrust_l.data = 0;
     thrust_r.data = 0;
     thrust_t.data = 0;

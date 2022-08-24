@@ -48,6 +48,7 @@ class control_jellyfishbot {
       ros::Publisher distance_to_target_topic;
       ros::Publisher path_segment_topic;
       ros::Publisher headings_topic;
+      ros::Publisher yaw_topic;
     
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration
@@ -409,45 +410,57 @@ class control_jellyfishbot {
         bool c2;
         double xdF;
         double ydF;
-        for (int i = 0; i < 2; i++) {
-            if (i ==0){
-            yd = ysol1;
+        double distance_test1, distance_test2;
+        distance_test1 = sqrt(pow(xf-xsol1,2)+pow(yf-ysol1,2));
+        distance_test2 = sqrt(pow(xf-xsol2,2)+pow(yf-ysol2,2)); 
+        if (distance_test1 <= distance_test2){
             xd = xsol1;
-            }
-            else if (i ==1){
-            yd = ysol2;
+            yd = ysol1;
+        }
+        else{
             xd = xsol2;
-            }
+            yd = ysol2;
+        }
+        // for (int i = 0; i < 2; i++) {
+        //     if (i ==0){
+        //     yd = ysol1;
+        //     xd = xsol1;
+        //     }
+        //     else if (i ==1){
+        //     yd = ysol2;
+        //     xd = xsol2;
+        //     }
 
-            if (xp <= xd <= xf | xp >= xd >= xf){
-              c1 = true;
-            }
-            else{
-              c1 = false;
-            }
+        //     if (xp <= xd <= xf | xp >= xd >= xf){
+        //       c1 = true;
+        //     }
+        //     else{
+        //       c1 = false;
+        //     }
 
-            if (yp <= yd <= yf | yp >= yd >= yf) {
-              c2 = true;
-            }
-            else{
-              c2 = false;
-            }
-            if (c1 == true & c2 == true){
-                int hehe = 1;
-                break;
-            }
-            else {
-                xd = xd + pow(xp - xd,2);
-                yd = yd + pow(yp - yd,2);
-            }
+        //     if (yp <= yd <= yf | yp >= yd >= yf) {
+        //       c2 = true;
+        //     }
+        //     else{
+        //       c2 = false;
+        //     }
+        //     if (c1 == true & c2 == true){
+        //         int hehe = 1;
+        //         //break;
+        //     }
+        //     else {
+        //         xd = xd + pow(xp - xd,2);
+        //         yd = yd + pow(yp - yd,2);
+        //     }
             
 
-            // xdF = xd;
-            // ydF = yd;
+        //     // xdF = xd;
+        //     // ydF = yd;
 
-        }
+        // }
 
             }
+        cout << "BEFORE  xd,yd:" << xd<<","<<yd<<endl;
         if (xd >= xf && xd >= xp ){
                 if (xf >= xp){
                     xd = xf;
@@ -666,7 +679,7 @@ void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v
     }
     else {
         // GO RIGHT or LEFT
-        tau_xV = 0;
+        tau_xV = 0.5;
         tau_yV = 0;
         tau_NV = (7/3.14)*e_psi;
         //tau_NV = 5*exp(e_psi-3.14);

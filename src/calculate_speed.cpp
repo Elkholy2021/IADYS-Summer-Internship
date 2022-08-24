@@ -122,6 +122,7 @@ class calculate_speads{
     // p.y = meters * sin(degreeToRadian(angle));
     p.x = meters * cos(angle);
     p.y = meters * sin(angle);
+
     return p;
     }
     double calculate_velocity(){
