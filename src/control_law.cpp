@@ -50,6 +50,7 @@ class control_jellyfishbot {
       ros::Publisher headings_topic;
       ros::Publisher yaw_topic;
       ros::Publisher e_psi_topic;
+      ros::Publisher current_location_topic;
     
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration
@@ -108,8 +109,8 @@ class control_jellyfishbot {
       double e_psi0_NO_SPEED = 0;
       double e_psi_integral_NO_SPEED = 0;
       double kp_psi_NO_SPEED = 2.25;
-      double kd_psi_NO_SPEED = 0.2;
-      double ki_psi_NO_SPEED = 0.3;
+      double kd_psi_NO_SPEED = 0;
+      double ki_psi_NO_SPEED = 0;
       //double e_dot_psi;
       //double Eta_psi;
       bool stop = false ;//A flag for check if the robot arrived to the final point and should stop
@@ -642,6 +643,7 @@ void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v
     double Xr = atan(-K_P*e-K_I*e_integral);
     
     double psi_d = Xp + Xr; // - atan(self.v/u_d)
+    
     cout<< "Xp: "<< Xp<< " ,Xr: "<< Xr<< endl;
     cout<< "psi_d before: "<< psi_d<< endl;
     cout << "psi before: "<<psi << endl;

@@ -23,6 +23,8 @@ class convert_gps_to_meter{
         double imuHeading0 ;
         double gpsHeading = 0;
         double heading_correction;
+        double latitude0 = 0;
+        double longitude0 = 0;
         // double latitudeR1;
         // double longitudeR1;
         // double latitudeR2;
