@@ -49,6 +49,7 @@ class control_jellyfishbot {
       ros::Publisher path_segment_topic;
       ros::Publisher headings_topic;
       ros::Publisher yaw_topic;
+      ros::Publisher e_psi_topic;
     
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration
@@ -103,6 +104,12 @@ class control_jellyfishbot {
       string movement;
       double x = 0;
       double y = 0;
+      double e_psi_dot_NO_SPEED = 0;
+      double e_psi0_NO_SPEED = 0;
+      double e_psi_integral_NO_SPEED = 0;
+      double kp_psi_NO_SPEED = 2.25;
+      double kd_psi_NO_SPEED = 0.2;
+      double ki_psi_NO_SPEED = 0.3;
       //double e_dot_psi;
       //double Eta_psi;
       bool stop = false ;//A flag for check if the robot arrived to the final point and should stop
@@ -568,6 +575,9 @@ class control_jellyfishbot {
         else if (e_psi_candidate < -M_PI){
             e_psi_candidate = e_psi_candidate + M_PI;
         }
+        if (e_psi_candidate > M_PI){
+            e_psi_candidate = -(e_psi_candidate-M_PI);
+        }
         e_psi = e_psi_candidate;
         //cout << "FFF e_psi: " << e_psi << " yaw: "<< psi << endl; 
 
@@ -652,16 +662,23 @@ void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v
     cout << "psi: "<< psi<< " ,psi_d: "<< psi_d << endl;
     cout << "e_psi_candidate before: "<< e_psi_candidate << endl;
     if (e_psi_candidate > M_PI){
-        e_psi_candidate = e_psi_candidate -M_PI;
+        e_psi_candidate = -(2 * M_PI - e_psi_candidate);
     }
     else if (e_psi_candidate < -M_PI){
-        e_psi_candidate = e_psi_candidate + M_PI;
+        e_psi_candidate = abs(e_psi_candidate + 2 * M_PI);
     }
+    cout << "e_psi_candidate after: "<< e_psi_candidate << endl;
+
     e_psi = e_psi_candidate;
     //cout << "FFF e_psi: " << e_psi << " yaw: "<< psi << endl; 
 
+    e_psi_dot_NO_SPEED = (e_psi-e_psi0_NO_SPEED)/dt;
+    e_psi_integral_NO_SPEED = e_psi_integral_NO_SPEED + e_psi*dt;
 
     
+    if (e_psi < 0.05 && e_psi > -0.05){
+        e_psi_integral_NO_SPEED = 0;
+    }
     if (e_psi >= 0){
         //MOVE RIGHT
         movement = "RIGHT";
@@ -681,9 +698,10 @@ void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v
         // GO RIGHT or LEFT
         tau_xV = 0.5;
         tau_yV = 0;
-        tau_NV = (7/3.14)*e_psi;
+        tau_NV = kp_psi_NO_SPEED*e_psi + kd_psi_NO_SPEED*e_psi_dot_NO_SPEED + ki_psi_NO_SPEED*e_psi_integral_NO_SPEED;
         //tau_NV = 5*exp(e_psi-3.14);
     }
+    e_psi0_NO_SPEED = e_psi;
     
     
    

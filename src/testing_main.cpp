@@ -166,7 +166,11 @@ void RunMyAlgorithm(){
     
     //jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
     jellyfishbot_control_system.obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(u_d,v_d,jellyfishbot_control_system.xd,jellyfishbot_control_system.yd);
-
+    geometry_msgs::Vector3 e_psi_msg;
+    e_psi_msg.x = jellyfishbot_control_system.e_psi;
+    e_psi_msg.y = jellyfishbot_control_system.e_psi_integral_NO_SPEED;
+    e_psi_msg.z = jellyfishbot_control_system.e_psi_dot_NO_SPEED;
+    jellyfishbot_control_system.e_psi_topic.publish(e_psi_msg);
     tau_L = jellyfishbot_control_system.tau_L;
     tau_R = jellyfishbot_control_system.tau_R;
     tau_M = jellyfishbot_control_system.tau_M;
@@ -259,8 +263,21 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
         // gpsPoints.arr[1][1] =  5.580985;
         // gpsPoints.arr[0][1] = 43.251705;  //south east corner of our building
         // gpsPoints.arr[1][1] = 5.580987;
-        gpsPoints.arr[0][1] = 43.251739;  //south wast corner of our building
-        gpsPoints.arr[1][1] = 5.580427;
+        // gpsPoints.arr[0][1] = 43.251739;  //south west corner of our building
+        // gpsPoints.arr[1][1] = 5.580427;
+        // gpsPoints.arr[0][1] = 43.251497;  //south west  building
+        // gpsPoints.arr[1][1] = 5.579992;
+        // gpsPoints.arr[0][1] = 43.251421;  //south west  building2
+        // gpsPoints.arr[1][1] = 5.580414;
+        // gpsPoints.arr[0][1] = 43.251250;  //south east  building2
+        // gpsPoints.arr[1][1] = 5.581190;
+        // gpsPoints.arr[0][1] = 43.251994;  //north east  building2
+        // gpsPoints.arr[1][1] = 5.581587;
+        gpsPoints.arr[0][1] = 43.251831;  //north east  very small
+        gpsPoints.arr[1][1] = 5.580704;
+        
+        
+        
 
 
         // gpsPoints.arr[0][1] = 43.213793;
@@ -451,6 +468,7 @@ int main(int argc, char **argv) {
     ros::Publisher path_segment_topic = n.advertise<geometry_msgs::Quaternion >("/path_segment_topic", 1000);
     ros::Publisher headings_topic = n.advertise<geometry_msgs::Quaternion >("/headings_topic", 1000);
     ros::Publisher yaw_topic = n.advertise<geometry_msgs::Vector3 >("/yaw_topic", 1000);
+    ros::Publisher e_psi_topic = n.advertise<geometry_msgs::Vector3 >("/e_psi_topic", 1000);
 
     
 
@@ -466,6 +484,7 @@ int main(int argc, char **argv) {
     jellyfishbot_control_system.path_segment_topic = path_segment_topic;
     jellyfishbot_control_system.headings_topic = headings_topic;
     jellyfishbot_control_system.yaw_topic = yaw_topic;
+    jellyfishbot_control_system.e_psi_topic = e_psi_topic;
     thrust_l.data = 0;
     thrust_r.data = 0;
     thrust_t.data = 0;
