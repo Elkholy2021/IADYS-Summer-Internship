@@ -51,6 +51,7 @@ class control_jellyfishbot {
       ros::Publisher yaw_topic;
       ros::Publisher e_psi_topic;
       ros::Publisher current_location_topic;
+      ros::Publisher initial_vs_current_gps_topic;
     
       double k_u_amax=5; //positive surge acceleration gain
       double u_dot_max = 5; // maximum allowed surge acceleration
@@ -642,21 +643,21 @@ void obtain__thruster_commands_LOS_Virtual_target_NO_SPEEDS(double u_d, double v
     e_integral =  e_integral + e*dt;
     double Xr = atan(-K_P*e-K_I*e_integral);
     
-    double psi_d = Xp + Xr; // - atan(self.v/u_d)
+    double psi_d = Xp ; //+ Xr; // - atan(self.v/u_d)
     
     cout<< "Xp: "<< Xp<< " ,Xr: "<< Xr<< endl;
     cout<< "psi_d before: "<< psi_d<< endl;
     cout << "psi before: "<<psi << endl;
-    if (psi_d < -0.5*M_PI  | psi < -0.5*M_PI  | psi_d > 0.5*M_PI  | psi > 0.5*M_PI ){
-        if (psi_d < 0){
-            psi_d = psi_d +2*M_PI;
-        }
+    // if (psi_d < -0.5*M_PI  | psi < -0.5*M_PI  | psi_d > 0.5*M_PI  | psi > 0.5*M_PI ){
+    //     if (psi_d < 0){
+    //         psi_d = psi_d +2*M_PI;
+    //     }
             
         
-        if (psi < 0){
-            psi = psi + 2*M_PI; 
-        }
-    }
+    //     if (psi < 0){
+    //         psi = psi + 2*M_PI; 
+    //     }
+    // }
     Psi_d = psi_d;
     //cout << "psi_d: "<< psi_d<< endl; 
     //cout << "FFF psi_d: " << psi_d << endl; 

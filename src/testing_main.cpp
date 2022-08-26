@@ -258,8 +258,15 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
         // gpsPoints.arr[0][1] = 43.251692;  //south west building nearby
         // gpsPoints.arr[1][1] =  5.580291;
          
-        gpsPoints.arr[0][1] = 43.252015;  //corner north west building accros street
-        gpsPoints.arr[1][1] =  5.580286; 
+        // gpsPoints.arr[0][1] = 43.252015;  //corner north west building accros street
+        // gpsPoints.arr[1][1] =  5.580286; 
+
+        // gpsPoints.arr[0][1] = 43.251610;  //car in the parking lot
+        // gpsPoints.arr[1][1] =  5.580749; 
+        
+        gpsPoints.arr[0][1] = 43.251674;  //corner of the fence in the parking lot
+        gpsPoints.arr[1][1] = 5.580846;
+        
         // gpsPoints.arr[0][1] = 43.251811;  //west
         // gpsPoints.arr[1][1] =  5.579929; 
         // gpsPoints.arr[0][1] = 43.251801;  //north east corner of our building
@@ -392,9 +399,14 @@ void odomGPSCallback(const sensor_msgs::NavSatFix &msg)
         distance_to_target_msg.x = jellyfishbot_control_system.xf; //conversion.latitude0;
         distance_to_target_msg.y = jellyfishbot_control_system.yf; //conversion.longitude0;
         distance_to_target_msg.z = jellyfishbot_control_system.distance;
-
         jellyfishbot_control_system.distance_to_target_topic.publish(distance_to_target_msg);
 
+        geometry_msgs::Quaternion initial_vs_current_gps_msg;
+        initial_vs_current_gps_msg.x = conversion.latitude0;
+        initial_vs_current_gps_msg.y = conversion.longitude0;
+        initial_vs_current_gps_msg.z = msg.latitude;
+        initial_vs_current_gps_msg.w = msg.longitude;
+        jellyfishbot_control_system.initial_vs_current_gps_topic.publish(initial_vs_current_gps_msg);
         geometry_msgs::Quaternion path_segment_msg;
         path_segment_msg.x = jellyfishbot_control_system.ax;
         path_segment_msg.y = jellyfishbot_control_system.ay;
@@ -514,10 +526,12 @@ int main(int argc, char **argv) {
     ros::Publisher thrusters_rpm_topic = n.advertise<geometry_msgs::Vector3 >("/thrusters_rpm", 1000);
     ros::Publisher distance_to_target_topic = n.advertise<geometry_msgs::Vector3 >("/distance_to_target", 1000);
     ros::Publisher path_segment_topic = n.advertise<geometry_msgs::Quaternion >("/path_segment_topic", 1000);
-    ros::Publisher headings_topic = n.advertise<geometry_msgs::Quaternion >("/headings_topic", 1000);
+    ros::Publisher headings_topic = n.advertise<geometry_msgs::Quaternion >("/headings_topics", 1000);
     ros::Publisher yaw_topic = n.advertise<geometry_msgs::Vector3 >("/yaw_topic", 1000);
     ros::Publisher e_psi_topic = n.advertise<geometry_msgs::Vector3 >("/e_psi_topic", 1000);
     ros::Publisher current_location_topic = n.advertise<geometry_msgs::Vector3 >("/current_location_topic", 1000);
+    ros::Publisher initial_vs_current_gps_topic = n.advertise<geometry_msgs::Quaternion >("/initial_vs_current_gps_topic", 1000);
+
 
     
 
@@ -535,6 +549,7 @@ int main(int argc, char **argv) {
     jellyfishbot_control_system.yaw_topic = yaw_topic;
     jellyfishbot_control_system.e_psi_topic = e_psi_topic;
     jellyfishbot_control_system.current_location_topic = current_location_topic;
+    jellyfishbot_control_system.initial_vs_current_gps_topic = initial_vs_current_gps_topic;
     thrust_l.data = 0;
     thrust_r.data = 0;
     thrust_t.data = 0;
